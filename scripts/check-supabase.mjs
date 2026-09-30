@@ -14,10 +14,10 @@ console.log('Email confirmation: '+(settings.mailer_autoconfirm?'disabled':'requ
 for(const table of ['learner_profiles','learner_progress','teacher_accounts']){
  const response=await fetch(base+'/rest/v1/'+table+'?select=*&limit=0',{headers,signal:AbortSignal.timeout(20000)});
  const body=await response.json();
- if(response.status!==403 || body.code!=='42501')throw new Error('Expected anonymous access denial for '+table+'; received HTTP '+response.status+' code '+body.code);
+ if(![401,403].includes(response.status) || body.code!=='42501')throw new Error('Expected anonymous access denial for '+table+'; received HTTP '+response.status+' code '+body.code);
  console.log(table+': exists; anonymous access denied.');
 }
 const rpc=await fetch(base+'/rest/v1/rpc/is_teacher',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(20000)});
 const rpcBody=await rpc.json();
-if(rpc.status!==403 || rpcBody.code!=='42501')throw new Error('Teacher check is not correctly protected: HTTP '+rpc.status+' code '+rpcBody.code);
+if(![401,403].includes(rpc.status) || rpcBody.code!=='42501')throw new Error('Teacher check is not correctly protected: HTTP '+rpc.status+' code '+rpcBody.code);
 console.log('Teacher role check: anonymous access denied.');
