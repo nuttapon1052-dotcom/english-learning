@@ -18,6 +18,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - name: Check Supabase connection and anonymous restrictions
+        run: node scripts/check-supabase.mjs
       - name: Install browser test runner
         run: npm install --no-save --package-lock=false @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
