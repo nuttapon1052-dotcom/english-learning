@@ -17,6 +17,7 @@ test('guest can navigate, search, finish lesson 24 and retain progress',async({p
  await page.reload();await expect(page.locator('.stats-grid .stat').first()).toContainText('1 / 24');
 });
 test('mobile layout has no horizontal page overflow and account is honest before setup',async({page})=>{
+ await page.route('**/auth-config.json',route=>route.fulfill({json:{supabaseUrl:'',supabasePublicKey:''}}));
  await page.setViewportSize({width:390,height:844});
  await page.goto('/english-learning/');
  await expect(page.locator('.hero')).toBeVisible();
@@ -25,4 +26,14 @@ test('mobile layout has no horizontal page overflow and account is honest before
  await expect(page.getByRole('heading',{name:'ระบบบัญชีกำลังเตรียมเปิดใช้งาน'})).toBeVisible();
  await expect(page.locator('#authForm')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+});
+
+test('configured account displays real login and signup forms',async({page})=>{
+ await page.goto('/english-learning/#account');
+ await expect(page.locator('#authForm')).toBeVisible();
+ await expect(page.locator('#email')).toHaveAttribute('type','email');
+ await page.locator('[data-auth-mode="signup"]').click();
+ await expect(page.locator('#displayName')).toBeVisible();
+ await expect(page.locator('#passwordConfirm')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'ระบบบัญชีกำลังเตรียมเปิดใช้งาน'})).toHaveCount(0);
 });
