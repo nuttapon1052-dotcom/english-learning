@@ -10,6 +10,7 @@ if(!settingsResponse.ok)throw new Error('Supabase auth connection failed: HTTP '
 const settings=await settingsResponse.json();
 if(settings.external?.email!==true)throw new Error('Email authentication is not enabled');
 console.log('Supabase connection: OK. Email authentication enabled.');
+console.log('Google authentication: '+(settings.external?.google===true?'enabled':'not enabled; owner setup required'));
 console.log('Email confirmation: '+(settings.mailer_autoconfirm?'disabled':'required'));
 for(const table of ['learner_profiles','learner_progress','teacher_accounts']){
  const response=await fetch(base+'/rest/v1/'+table+'?select=*&limit=0',{headers,signal:AbortSignal.timeout(20000)});
