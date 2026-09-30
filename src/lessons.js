@@ -1,3 +1,4 @@
+import { extraLessons } from './extra-lessons.js';
 const lesson = (id, icon, title, subtitle, goal, words, examples, grammar, practice) => ({
   id, icon, title, subtitle, goal, words, examples, grammar, practice, minutes: 12,
 });
@@ -47,19 +48,50 @@ export const lessons = [
     [['what','อะไร','ว็อท'],['where','ที่ไหน','แวร์'],['when','เมื่อไร','เว็น'],['how','อย่างไร','ฮาว'],['who','ใคร','ฮู'],['why','ทำไม','วาย']],
     [['What is your name?','คุณชื่ออะไร','ว็อท อิส ยัวร์ เนม'],['Where do you work?','คุณทำงานที่ไหน','แวร์ ดู ยู เวิร์ก'],['How are you?','คุณเป็นอย่างไรบ้าง','ฮาว อาร์ ยู']],
     'คำถามข้อมูลเริ่มด้วย <b>คำแสดงสิ่งที่อยากรู้</b> เช่น where (สถานที่) แล้วจึงตามด้วย do + ประธาน + กริยา หรือ verb to be + ประธาน',
-    {listen:'Where do you work?',choices:['คุณทำงานที่ไหน','คุณทำงานเมื่อไร','คุณทำงานอย่างไร'],answer:0,arrange:['your','What','name?','is'],arranged:'What is your name?',fill:[' are you?'],blank:'How',read:'“Where do you live?” “I live in Chiang Mai.”',question:'คำตอบบอกข้อมูลอะไร?',readChoices:['สถานที่','เวลา','ชื่อ'],readAnswer:0,write:'Where do you',accepts:['what','where','when','how']}),
+    {listen:'Where do you work?',choices:['คุณทำงานที่ไหน','คุณทำงานเมื่อไร','คุณทำงานอย่างไร'],answer:0,arrange:['your','What','name?','is'],arranged:'What is your name?',fill:['',' are you?'],blank:'How',read:'“Where do you live?” “I live in Chiang Mai.”',question:'คำตอบบอกข้อมูลอะไร?',readChoices:['สถานที่','เวลา','ชื่อ'],readAnswer:0,write:'Where do you',accepts:['what','where','when','how']}),
   lesson(10, '💬', 'บทสนทนาทบทวน', 'ใช้จริงในชีวิตประจำวัน', 'นำคำศัพท์และโครงสร้างทั้งหมดมาคุยสั้น ๆ ได้',
     [['today','วันนี้','ทู-เดย์'],['together','ด้วยกัน','ทู-เกธ-เธอร์'],['busy','ยุ่ง','บิซ-ซี'],['free','ว่าง','ฟรี'],['later','ภายหลัง','เล-เทอร์'],['sure','ได้เลย / แน่นอน','ชัวร์']],
     [['Are you free today?','วันนี้คุณว่างไหม','อาร์ ยู ฟรี ทู-เดย์'],['I am busy, but I am free later.','ฉันยุ่ง แต่จะว่างทีหลัง','ไอ แอม บิซ-ซี บัท ไอ แอม ฟรี เล-เทอร์'],['Can we eat together?','เราไปกินข้าวด้วยกันได้ไหม','แคน วี อีท ทู-เกธ-เธอร์']],
     'บทสนทนาจริงนำโครงสร้างเดิมมารวมกัน: <b>คำถาม → คำตอบ → เพิ่มเหตุผลหรือทางเลือก</b> ไม่ต้องพูดยาว แค่ชัดเจนและสุภาพก็สื่อสารได้',
-    {listen:'Are you free today?',choices:['วันนี้คุณว่างไหม','วันนี้คุณทำงานไหม','วันนี้คุณไปไหน'],answer:0,arrange:['eat','Can we','together?'],arranged:'Can we eat together?',fill:['I am busy, ',' I am free later.'],blank:'but',read:'A: Are you free today? B: I work until five, but I am free later. A: Can we eat together? B: Sure!',question:'ทั้งคู่จะทำอะไร?',readChoices:['กินข้าวด้วยกัน','ไปทำงาน','ซื้อของ'],readAnswer:0,write:'Today, I',accepts:['today','i am','i can','i want']}),
+    {listen:'Are you free today?',choices:['วันนี้คุณว่างไหม','วันนี้คุณทำงานไหม','วันนี้คุณไปไหน'],answer:0,arrange:['eat','Can we','together?'],arranged:'Can we eat together?',fill:['I am busy, ',' I am free later.'],blank:'but',read:'A: Are you free today? B: I work until five, but I am free later. A: Can we eat together? B: Sure!',question:'ทั้งคู่จะทำอะไร?',readChoices:['กินข้าวด้วยกัน','ไปทำงาน','ซื้อของ'],readAnswer:0,write:'Today, I',accepts:['today','i am','i can','i want']}), 
+  ...extraLessons,
 ];
 
 export const roadmap = [
-  ['สัปดาห์ 1–2','ปูพื้นฐาน','เสียง คำทักทาย และประโยคแรก','ready'],
-  ['สัปดาห์ 3–4','รู้จักตัวเอง','งาน กิจวัตร และสิ่งรอบตัว','ready'],
-  ['สัปดาห์ 5–6','สื่อสารประจำวัน','อาหาร ความชอบ และความต้องการ','ready'],
-  ['สัปดาห์ 7–8','ต่อประโยค','คำเชื่อม คำถาม และบทสนทนา','ready'],
-  ['สัปดาห์ 9–10','ออกไปใช้จริง','ซื้อของและการเดินทาง','soon'],
-  ['สัปดาห์ 11–12','มั่นใจขึ้น','นัดหมายและเล่าเรื่องสั้น','soon'],
+  [
+    "บท 1–4",
+    "เริ่มจากพื้นฐาน",
+    "ทักทาย ประโยคแรก งาน และกิจวัตร",
+    "ready"
+  ],
+  [
+    "บท 5–8",
+    "เรื่องใกล้ตัว",
+    "อาหาร ความชอบ และการเชื่อมประโยค",
+    "ready"
+  ],
+  [
+    "บท 9–12",
+    "เริ่มบทสนทนา",
+    "คำถาม ซื้อของ และถามทาง",
+    "ready"
+  ],
+  [
+    "บท 13–16",
+    "ใช้ได้ทุกวัน",
+    "สั่งอาหาร นัดหมาย อากาศ และสุขภาพ",
+    "ready"
+  ],
+  [
+    "บท 17–20",
+    "เล่าเรื่องและเดินทาง",
+    "อดีต อนาคต เปรียบเทียบ และโรงแรม",
+    "ready"
+  ],
+  [
+    "บท 21–24",
+    "สื่อสารอย่างมั่นใจ",
+    "อีเมล ประชุม โทรศัพท์ และภารกิจรวม",
+    "ready"
+  ]
 ];
