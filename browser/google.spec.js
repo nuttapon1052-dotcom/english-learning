@@ -28,18 +28,24 @@ test('Google provider awaiting setup keeps the email option usable',async({page}
 });
 test('Google callback restores a verified account and removes token parameters',async({page})=>{
  await mockConfig(page);
+ let remote=null,revision=0;
  const user={id:'00000000-0000-4000-8000-000000000001',email:'learner@example.org',user_metadata:{full_name:'Google Learner'}};
  await page.route(base+'/**',route=>{
   const url=new URL(route.request().url());
   expect(route.request().headers().authorization).toBe('Bearer test-access');
   if(url.pathname==='/auth/v1/user')return route.fulfill({json:user});
   if(url.pathname==='/rest/v1/rpc/is_teacher')return route.fulfill({json:false});
-  if(url.pathname==='/rest/v1/learner_progress')return route.request().method()==='GET'?route.fulfill({json:[]}):route.fulfill({status:204});
+  if(url.pathname==='/rest/v1/learner_progress'){
+   if(route.request().method()==='GET')return route.fulfill({json:remote?[remote]:[]});
+   const body=route.request().postDataJSON();
+   remote={user_id:user.id,state:body.state,updated_at:new Date(1700000000000+(++revision)).toISOString()};
+   return route.fulfill({json:[remote]});
+  }
   throw new Error('Unexpected auth request');
  });
  await page.goto('/english-learning/#access_token=test-access&refresh_token=test-refresh&expires_in=3600&type=signup');
  await expect(page.getByRole('heading',{name:'สวัสดี Google Learner.'})).toBeVisible();
- await expect(page.locator('[data-sync-status]')).toContainText('ซิงก์ความก้าวหน้าแล้ว');
+ await expect(page.locator('.sync-banner [data-sync-status]')).toContainText('ซิงก์ความก้าวหน้าแล้ว');
  expect(page.url()).toBe('http://127.0.0.1:5173/english-learning/#account');
  await page.reload();
  await expect(page.getByRole('heading',{name:'สวัสดี Google Learner.'})).toBeVisible();

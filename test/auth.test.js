@@ -20,7 +20,7 @@ test('passwords are never persisted; progress uses user JWT',async()=>{
  const store=memory(),calls=[];
  const client=createAuthClient({...opts,storage:store,fetchImpl:async(url,options)=>{calls.push({url,options});return response(url.includes('/token?')?session:null);}});
  await client.signIn('a@example.org','password-123');
- await client.putProgress('A',{completed:[1]});
+ await client.compareAndSetProgress('A',{completed:[1]});
  assert.ok(![...store.map.values()].some(v=>v.includes('password-123')));
  assert.equal(calls[1].options.headers.Authorization,'Bearer access');
  assert.equal(JSON.parse(calls[1].options.body).user_id,'A');
@@ -37,7 +37,7 @@ test('concurrent expired-token requests refresh once',async()=>{
 });
 test('failed cloud writes are surfaced instead of marked saved',async()=>{
  const client=createAuthClient({...opts,storage:memory(),fetchImpl:async url=>url.includes('/token?')?response(session):response({message:'RLS denied'},403)});
- await client.signIn('a@example.org','password-123');await assert.rejects(()=>client.putProgress('B',{}),/RLS denied/);
+ await client.signIn('a@example.org','password-123');await assert.rejects(()=>client.compareAndSetProgress('B',{}),/RLS denied/);
 });
 test('recovery callback validates the user before reporting password-reset mode',async()=>{
  const client=createAuthClient({...opts,storage:memory(),fetchImpl:async()=>response(session.user)});
@@ -80,4 +80,23 @@ test('cancelled OAuth callbacks report cancellation without accepting identity',
  const client=createAuthClient({...opts,storage:memory(),fetchImpl:async()=>{requests++;}});
  await assert.rejects(()=>client.restore('#error=access_denied&error_description=cancelled'),error=>error.code==='access_denied');
  assert.equal(requests,0);assert.equal(client.session,null);
+});
+
+test('updates are conditional on the server timestamp and request the saved row',async()=>{
+ const calls=[],version='2026-09-30T12:00:00.123456+00:00';
+ const client=createAuthClient({...opts,storage:memory(),fetchImpl:async(url,options)=>{calls.push({url,options});return response(url.includes('/token?')?session:[]);}});
+ await client.signIn('a@example.org','password-123');
+ const saved=await client.compareAndSetProgress('A',{completed:[1]},version,{keepalive:true});
+ const call=calls[1],url=new URL(call.url);
+ assert.equal(call.options.method,'PATCH');
+ assert.equal(url.searchParams.get('updated_at'),'eq.'+version);
+ assert.equal(url.searchParams.get('user_id'),'eq.A');
+ assert.equal(call.options.keepalive,true);
+ assert.equal(call.options.headers.Prefer,'return=representation');
+ assert.equal(saved,null,'a racing update is retried; empty rows are not treated as saved');
+});
+test('a competing first insert is retried instead of overwriting it',async()=>{
+ const client=createAuthClient({...opts,storage:memory(),fetchImpl:async url=>url.includes('/token?')?response(session):response({code:'23505',message:'duplicate key'},409)});
+ await client.signIn('a@example.org','password-123');
+ assert.equal(await client.compareAndSetProgress('A',{}),null);
 });

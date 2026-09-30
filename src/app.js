@@ -1,11 +1,12 @@
 import './styles.css';
 import { lessons, roadmap } from './lessons.js';
-import { freshProgress, normalizeProgress, mergeProgress, accountKey, todayKey } from './progress.js';
+import { freshProgress, normalizeProgress, mergeProgress, importProgress, accountKey, todayKey } from './progress.js';
 import { createAuthClient } from './auth.js';
+import { saveCloudProgress } from './cloud-progress.js';
 import { loadAuthConfig } from './config.js';
 
 let user = null, auth = null, isTeacher = false, cloudReady = false, authBusy = true;
-let syncState = 'local', syncTimer, syncing = null, syncAgain = false, identityVersion = 0;
+let syncState = 'local', syncTimer, syncing = null, syncAgain = false, identityVersion = 0, cloudRow = null;
 let accountMode = 'login', recoveryMode = false, courseFilter = 'all', courseSearch = '';
 function loadLocal(id) { try { return normalizeProgress(JSON.parse(localStorage.getItem(accountKey(id)) || '{}')); } catch { return freshProgress(); } }
 let state = loadLocal();
@@ -25,32 +26,31 @@ function writeLocal() {
   catch { toast('พื้นที่บันทึกในเครื่องไม่พร้อม กรุณาส่งออกข้อมูลในหน้าความก้าวหน้า'); }
 }
 function save() {
-  state.updatedAt = Date.now();
+  state.updatedAt = Math.max(Date.now(),state.updatedAt+1);
   state.activity = [...new Set([...state.activity,todayKey()])].slice(-365);
   state = normalizeProgress(state);
   writeLocal();
   if(user && cloudReady) {
     syncState = 'pending'; clearTimeout(syncTimer);
-    syncTimer = setTimeout(()=>{syncCloud().catch(()=>{});},700);
+    syncTimer = setTimeout(()=>{syncCloud().catch(()=>{});},200);
   }
+  updateSyncLabel();
 }
 function syncText() { return !user ? 'เก็บความก้าวหน้าในเครื่องนี้' : ({saved:'ซิงก์ความก้าวหน้าแล้ว',pending:'รอซิงก์ความก้าวหน้า',syncing:'กำลังซิงก์…',error:'ยังไม่ซิงก์ · ข้อมูลอยู่ในเครื่อง',loading:'กำลังโหลดบัญชี'}[syncState] || 'ข้อมูลอยู่ในเครื่อง'); }
 async function syncCloud() {
   if(!user || !cloudReady) return;
   if(syncing) { syncAgain=true; return syncing; }
   const version=identityVersion, id=user.id;
-  syncState='syncing';
+  syncState='syncing';updateSyncLabel();
   syncing=(async()=>{
     try {
       do {
         syncAgain=false;
         const snapshot=normalizeProgress(state);
-        const remote=await auth.getProgress(id);
+        const saved=await saveCloudProgress(auth,id,snapshot);
         if(version!==identityVersion)return;
-        const merged=mergeProgress(snapshot,remote?.state);
-        await auth.putProgress(id,merged);
-        if(version!==identityVersion)return;
-        state=mergeProgress(state,merged); writeLocal();
+        cloudRow=saved;
+        state=mergeProgress(state,saved.state); writeLocal();
         if(state.updatedAt>snapshot.updatedAt)syncAgain=true;
       } while(syncAgain && version===identityVersion);
       if(version===identityVersion) syncState='saved';
@@ -59,17 +59,45 @@ async function syncCloud() {
   })();
   return syncing;
 }
-function updateSyncLabel() { document.querySelectorAll('[data-sync-status]').forEach(el=>el.textContent=syncText()); }
+function updateSyncLabel() {
+ document.querySelectorAll('[data-sync-status]').forEach(el=>el.textContent=syncText());
+ document.querySelectorAll('.sync-banner').forEach(el=>el.dataset.state=syncState);
+}
+function sessionForLesson(id) {
+ const draft=state.lessonDrafts[id];
+ return {selected:draft?{listen:draft.listen??undefined,read:draft.read??undefined,writing:draft.writing,fillValue:draft.fillValue,arrangePassed:draft.arrangeChecked,fillPassed:draft.fillChecked}:{},arranged:draft?.arranged?[...draft.arranged]:[],showTranscript:false,recording:false,recognitionText:'',audioUrl:null};
+}
+function saveDraft(id) {
+ state.lessonDrafts[id]={
+  arranged:[...lessonSession.arranged],fillValue:lessonSession.selected.fillValue||'',writing:lessonSession.selected.writing||'',
+  listen:lessonSession.selected.listen??null,read:lessonSession.selected.read??null,
+  arrangeChecked:lessonSession.selected.arrangePassed===true,fillChecked:lessonSession.selected.fillPassed===true,
+  updatedAt:Math.max(Date.now(),state.updatedAt+1)
+ };
+ save();
+}
+function flushProgressInBackground() {
+ if(!user||!cloudReady||syncState==='saved')return;
+ clearTimeout(syncTimer);
+ const version=identityVersion,id=user.id,snapshot=mergeProgress(state,cloudRow?.state);
+ auth.compareAndSetProgress(id,snapshot,cloudRow?.updated_at??null,{keepalive:true}).then(row=>{
+  if(version!==identityVersion)return;
+  if(!row){syncState='pending';updateSyncLabel();return;}
+  cloudRow=row;state=mergeProgress(state,row.state);writeLocal();
+  syncState=state.updatedAt>snapshot.updatedAt?'pending':'saved';updateSyncLabel();
+ }).catch(()=>{if(version===identityVersion){syncState='error';updateSyncLabel();}});
+}
 async function adoptUser(nextUser) {
-  identityVersion++; clearTimeout(syncTimer); cloudReady=false; isTeacher=false;
+  identityVersion++; clearTimeout(syncTimer); cloudReady=false; isTeacher=false; cloudRow=null;
   user=nextUser; lessonSession={selected:{},arranged:[],showTranscript:false,recording:false,recognitionText:'',audioUrl:null}; state=loadLocal(user?.id); syncState=user?'loading':'local';
   if(!user)return;
   const version=identityVersion;
   try {
     const remote=await auth.getProgress(user.id);
     if(version!==identityVersion)return;
-    state=mergeProgress(state,remote?.state); writeLocal(); cloudReady=true; syncState='saved';
-    isTeacher=await auth.isTeacher();
+    cloudRow=remote;state=mergeProgress(state,remote?.state);writeLocal();cloudReady=true;syncState='pending';
+    lessonSession=sessionForLesson(state.currentLesson);
+    isTeacher=await auth.isTeacher().catch(()=>false);
     await syncCloud();
   } catch { if(version===identityVersion) syncState='error'; }
 }
@@ -78,8 +106,8 @@ async function retryCloud() {
   const version=identityVersion;
   const remote=await auth.getProgress(user.id);
   if(version!==identityVersion)return;
-  state=mergeProgress(state,remote?.state); writeLocal(); cloudReady=true;
-  isTeacher=await auth.isTeacher();
+  cloudRow=remote;state=mergeProgress(state,remote?.state);writeLocal();cloudReady=true;
+  isTeacher=await auth.isTeacher().catch(()=>false);
   await syncCloud();
 }
 function shell(content) {
@@ -94,7 +122,7 @@ function shell(content) {
   <aside class="sidebar"><p class="nav-caption">YOUR LEARNING SPACE</p><nav class="desktop-nav" aria-label="เมนูหลัก">${nav}</nav>
   <div class="sidebar-tip"><span>✦</span><strong>วันละนิด ก็ไปได้ไกล</strong><p>ฟัง ลองพูด แล้วค่อย ๆ ใช้<br>ไม่ต้องรอให้พร้อมทุกอย่าง</p><button data-lesson="${state.currentLesson}" class="btn secondary">เรียนต่อ →</button></div>
   <button class="sidebar-account" data-nav="account">${user?'บัญชีของฉัน':'สมัครเพื่อเก็บความก้าวหน้า'} →</button></aside>
-  <main class="main" id="main-content" tabindex="-1">${content}<footer class="site-footer"><strong>English with Yuri</strong><span>พื้นที่เล็ก ๆ สำหรับก้าวใหญ่ของคุณ</span><button data-nav="account">บัญชีและการบันทึกข้อมูล ↗</button></footer></main>
+  <main class="main" id="main-content" tabindex="-1">${user?`<div class="sync-banner" data-state="${syncState}" role="status"><span data-sync-status>${syncText()}</span><button class="text-link" data-nav="account">บัญชีและการซิงก์ ↗</button></div>`:''}${content}<footer class="site-footer"><strong>English with Yuri</strong><span>พื้นที่เล็ก ๆ สำหรับก้าวใหญ่ของคุณ</span><button data-nav="account">บัญชีและการบันทึกข้อมูล ↗</button></footer></main>
   <nav class="bottom-nav" aria-label="เมนูหลักบนมือถือ">${mobile}</nav></div>`;
   bindCommon();
 }
@@ -120,7 +148,7 @@ function skillCards() {
   return Object.entries(state.skill).map(([name,value],i)=>`<button class="card skill" data-skill="${i}"><div class="skill-head"><span class="skill-symbol" aria-hidden="true">${['◉','◌','▤','✎'][i]}</span><span>${value}%</span></div><strong>${name}</strong><p>กิจกรรมฝึกที่ทำแล้ว</p><div class="bar"><i style="width:${value}%"></i></div></button>`).join('');
 }
 function bindSkills() {
-  document.querySelectorAll('[data-skill]').forEach(b=>b.onclick=()=>{state.currentStep=[3,4,5,5][+b.dataset.skill];state.cursorUpdatedAt=Date.now();save();startLesson(state.currentLesson);});
+  document.querySelectorAll('[data-skill]').forEach(b=>b.onclick=()=>{state.currentStep=[3,4,5,5][+b.dataset.skill];state.cursorUpdatedAt=Math.max(Date.now(),state.cursorUpdatedAt+1,state.updatedAt+1);save();startLesson(state.currentLesson);});
 }
 function renderToday() {
   const current=lessons.find(l=>l.id===state.currentLesson)||lessons[0];
@@ -195,17 +223,17 @@ function renderAccount() {
   if(authBusy) { shell('<section class="account-shell card" role="status"><p class="eyebrow">YOUR LEARNING ACCOUNT</p><h1>กำลังเชื่อมต่อบัญชี…</h1><p>รอสักครู่ ความก้าวหน้าจะถูกโหลดแยกตามบัญชี</p></section>');return; }
   if(user && !recoveryMode) {
     const name=user.user_metadata?.display_name || user.user_metadata?.full_name || user.email;
-    const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp;
+    const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp||guest.activity.length||Object.keys(guest.lessonDrafts).length||guest.assessment!==null;
     shell(`<header class="page-head"><p class="eyebrow">YOUR OWN LEARNING SPACE</p><h1>สวัสดี ${esc(name)}.</h1><p>${esc(user.email)}</p></header><div class="today-grid"><article class="card side-card"><span class="pill">บัญชีผู้เรียน</span><h2>ทุกก้าว เป็นของคุณ</h2><p data-sync-status>${syncText()}</p><p>เรียนแล้ว ${state.completed.length} จาก ${lessons.length} บท · เรียนค้างที่บท ${state.currentLesson}</p><div class="actions"><button class="btn primary" data-lesson="${state.currentLesson}">เรียนต่อ →</button><button class="btn secondary" id="syncNow">ซิงก์อีกครั้ง</button></div>${isTeacher?'<div class="settings-block"><h3>สำหรับครู</h3><p>ดูรายชื่อผู้เรียนและความก้าวหน้าจากข้อมูลที่ซิงก์แล้ว</p><button class="btn secondary" data-nav="teacher">เปิดหน้าผู้เรียน ↗</button></div>':''}</article><aside class="card side-card"><h2>จัดการบัญชี</h2><p>เมื่อออกจากระบบ เว็บกลับไปใช้ความก้าวหน้าแบบไม่สมัคร ข้อมูลแต่ละบัญชีแยกกัน</p>${hasGuest?'<div class="notice">พบความก้าวหน้าแบบไม่สมัครในเครื่องนี้ นำเข้าเฉพาะเมื่อเป็นข้อมูลของคุณเอง</div><button class="btn secondary" id="importGuest">นำความก้าวหน้าในเครื่องเข้าบัญชีนี้</button>':''}<div class="settings-block"><button class="btn secondary" id="passwordEmail">ส่งลิงก์เปลี่ยนรหัสผ่าน</button><button class="btn danger" id="logout">ออกจากระบบ</button></div><p id="accountFeedback" role="status"></p></aside></div>`);
     document.querySelector('#syncNow').onclick=async e=>{e.target.disabled=true;try{await retryCloud();toast('ซิงก์ความก้าวหน้าแล้ว');}catch{toast('ยังเชื่อมต่อไม่ได้ ข้อมูลในเครื่องยังอยู่');}finally{e.target.disabled=false;updateSyncLabel();}};
     document.querySelector('#passwordEmail').onclick=async e=>{e.target.disabled=true;try{await auth.recover(user.email);document.querySelector('#accountFeedback').textContent='ส่งคำขอแล้ว โปรดตรวจอีเมลและกล่องสแปม';}catch(err){document.querySelector('#accountFeedback').textContent=authError(err);}finally{e.target.disabled=false;}};
     document.querySelector('#logout').onclick=async e=>{
       e.target.disabled=true;
-      try{clearTimeout(syncTimer);if(syncing)await syncing.catch(()=>{});await auth.signOut();await adoptUser(null);navigate('today');toast('ออกจากระบบแล้ว');}
+      try{clearTimeout(syncTimer);try{if(cloudReady)await syncCloud();else await retryCloud();}catch{const error=new Error('ยังส่งความก้าวหน้าไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้ กรุณาลองซิงก์ก่อนออกจากระบบ');error.code='cloud_unsynced';throw error;}await auth.signOut();await adoptUser(null);navigate('today');toast('ออกจากระบบแล้ว');}
       catch(err){toast(authError(err));e.target.disabled=false;}
     };
     document.querySelector('#importGuest')?.addEventListener('click',()=>{
-      if(confirm('ยืนยันว่าความก้าวหน้าแบบไม่สมัครในเครื่องนี้เป็นของคุณ และต้องการรวมกับบัญชีนี้?')){state=mergeProgress(state,guest);save();renderAccount();}
+      if(confirm('ยืนยันว่าความก้าวหน้าแบบไม่สมัครในเครื่องนี้เป็นของคุณ และต้องการรวมกับบัญชีนี้?')){state=importProgress(state,guest);save();renderAccount();}
     });
     return;
   }
@@ -249,6 +277,7 @@ function renderAccount() {
   };
 }
 function authError(error) {
+  if(error.code==='cloud_unsynced')return error.message;
   if(error.code==='provider_disabled')return 'Google ยังไม่เปิดใช้งาน กรุณาใช้อีเมลก่อน';
   if(error.code==='access_denied')return 'ยกเลิกการเข้าสู่ระบบด้วย Google แล้ว ลองใหม่ได้เมื่อพร้อม';
   if(error.status===429)return 'ขอใช้งานถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
@@ -272,10 +301,10 @@ function renderAssessment(){
  document.querySelector('#finishAssess').onclick=()=>{const answers=[...document.querySelectorAll('[data-assess]')].map(x=>x.querySelector('.selected')===x.firstElementChild);const score=answers.filter(Boolean).length;state.assessment=score;save();toast(score>=2?'พื้นฐานดีเลย แนะนำเริ่มบท 2':'เริ่มบท 1 ได้เลย ยูริจะพาไปทีละขั้น');setTimeout(()=>startLesson(score>=2?2:1),800);};
 }
 
-function startLesson(id){if(!lessons.some(l=>l.id===id))id=1;if(state.currentLesson!==id)state.currentStep=0;state.currentLesson=id;state.cursorUpdatedAt=Date.now();save();lessonSession={selected:{},arranged:[],showTranscript:false,recording:false,recognitionText:'',audioUrl:null};navigate(`learn-${id}`);}
+function startLesson(id){if(!lessons.some(l=>l.id===id))id=1;if(state.currentLesson!==id)state.currentStep=0;state.currentLesson=id;state.cursorUpdatedAt=Date.now();save();lessonSession=sessionForLesson(id);navigate(`learn-${id}`);}
 const steps=['เป้าหมาย','คำศัพท์','ตัวอย่าง','ฟัง','พูด','อ่านและเขียน','ทดสอบ'];
 function renderLesson(id){
- const l=lessons.find(x=>x.id===id)||lessons[0];if(state.currentLesson!==l.id){state.currentLesson=l.id;state.currentStep=0;state.cursorUpdatedAt=Date.now();save();}const s=Math.min(state.currentStep,6); const body=stepBody(l,s);
+ const l=lessons.find(x=>x.id===id)||lessons[0];if(state.currentLesson!==l.id){state.currentLesson=l.id;state.currentStep=0;lessonSession=sessionForLesson(l.id);state.cursorUpdatedAt=Date.now();save();}const s=Math.min(state.currentStep,6); const body=stepBody(l,s);
  shell(`<section class="lesson-shell"><button class="back" data-nav="lessons">← บทเรียนทั้งหมด</button><div class="lesson-top"><div class="progress-info"><span>บทที่ ${l.id} · ${steps[s]}</span><span>${s+1} / 7</span></div><div class="bar"><i style="width:${(s+1)/7*100}%"></i></div></div><article class="card step-card">${body}<div class="step-actions"><button class="btn secondary" id="prev" ${s===0?'disabled':''}>← ย้อนกลับ</button><button class="btn primary" id="next">${s===6?'จบบทเรียน':'ไปต่อ →'}</button></div></article></section>`);
  bindStep(l,s);
 }
@@ -286,7 +315,7 @@ function stepBody(l,s){
  if(s===2)return `<p class="eyebrow">ประโยคตัวอย่าง</p><h2>ดูคำในประโยคจริง</h2>${l.examples.map(e=>`<div class="example"><button class="sound-btn" data-speak="${e[0]}" aria-label="ฟังประโยค">▶</button> <strong>${e[0]}</strong><p>${e[1]}</p>${state.showThaiSound?`<p class="thai-sound">เสียงประมาณ: ${e[2]}</p>`:''}</div>`).join('')}<div class="tip-box"><strong>ทำไมจึงเรียงแบบนี้?</strong><br>${l.grammar}</div>`;
  if(s===3){const p=l.practice,sel=lessonSession.selected.listen;return `<p class="eyebrow">ฝึกฟัง</p><h2>ฟังก่อน แล้วค่อยเปิดข้อความ</h2><div class="audio-panel"><button class="btn primary" id="listen">▶ ฟังประโยค</button><button class="btn ghost" id="repeat">↻ ฟังซ้ำ</button><select class="speed" id="speed" aria-label="ความเร็วเสียง"><option value=".7">ช้า 0.7×</option><option selected value="1">ปกติ 1×</option><option value="1.2">เร็ว 1.2×</option></select><button class="btn secondary" id="reveal">${lessonSession.showTranscript?'ซ่อนข้อความ':'เปิดข้อความ'}</button></div><p class="question ${lessonSession.showTranscript?'':'hidden-text'}">${p.listen}</p><p class="question">ประโยคนี้หมายถึงอะไร?</p><div class="options">${p.choices.map((x,i)=>`<button class="option ${sel===i?(i===p.answer?'correct':'wrong'):''}" data-listen-choice="${i}">${x}</button>`).join('')}</div>${sel!==undefined?`<div class="feedback ${sel===p.answer?'':'wrong'}">${sel===p.answer?'ดีมาก! คุณจับใจความได้ถูกต้อง':'ยังไม่ใช่ แต่ไม่เป็นไรนะ ลองฟังอีกครั้ง คำตอบคือ “'+p.choices[p.answer]+'”'}</div>`:''}`;}
  if(s===4)return `<p class="eyebrow">ฝึกพูด</p><h2>ฟังแล้วพูดตาม</h2><p class="step-lead">ใช้วิธี shadowing: ฟังต้นแบบ แล้วเลียนจังหวะทีละส่วน</p><div class="audio-panel"><button class="btn primary" data-speak="${l.practice.listen}">▶ ฟังต้นแบบ</button><strong>${l.practice.listen}</strong></div><div class="record-panel"><button class="record-btn ${lessonSession.recording?'recording':''}" id="record" aria-label="${lessonSession.recording?'หยุดอัดเสียง':'เริ่มอัดเสียง'}">${lessonSession.recording?'■':'●'}</button><p>${lessonSession.recording?'กำลังอัด… กดอีกครั้งเพื่อหยุด':'กดเพื่ออัดเสียง ระบบจะขอไมโครโฟนเมื่อกดเท่านั้น'}</p><p class="muted-label">เว็บไม่อัปโหลดไฟล์เสียงที่อัด การแปลงเสียงเป็นข้อความอาจใช้บริการของเบราว์เซอร์</p>${lessonSession.audioUrl?`<audio controls src="${lessonSession.audioUrl}"></audio><button class="btn danger" id="deleteAudio">ลบเสียง</button>`:''}${lessonSession.recognitionText?`<div class="tip-box">ระบบได้ยิน: <b>${esc(lessonSession.recognitionText)}</b><br><small>ใช้เพื่อเทียบคำเท่านั้น ไม่ใช่คะแนนความถูกต้องของการออกเสียง</small></div>`:''}</div>`;
- if(s===5){const p=l.practice,readSel=lessonSession.selected.read;return `<p class="eyebrow">อ่านและเขียน</p><h2>อ่านเรื่องสั้น แล้วลองเขียน</h2><div class="example"><p>${p.read}</p></div><p class="question">${p.question}</p><div class="options">${p.readChoices.map((x,i)=>`<button class="option ${readSel===i?(i===p.readAnswer?'correct':'wrong'):''}" data-read-choice="${i}">${x}</button>`).join('')}</div><p class="question">เขียนต่อจากคำเริ่มต้น (ตอบได้หลายแบบ)</p><label for="writing">${p.write} …</label><input class="text-input" id="writing" placeholder="พิมพ์ประโยคภาษาอังกฤษ" value="${esc(lessonSession.selected.writing||'')}"><div id="writeFeedback"></div><button class="btn secondary" id="checkWrite">ตรวจโครงสร้างเบื้องต้น</button><div class="notice" style="margin-top:16px">แบบฝึกคำตอบอิสระตรวจได้เพียงโครงสร้างพื้นฐาน ยังไม่สามารถตัดสินความเป็นธรรมชาติหรือความถูกต้องได้ทุกแบบ</div>`;}
+ if(s===5){const p=l.practice,readSel=lessonSession.selected.read;return `<p class="eyebrow">อ่านและเขียน</p><h2>อ่านเรื่องสั้น แล้วลองเขียน</h2><div class="example"><p>${p.read}</p></div><p class="question">${p.question}</p><div class="options">${p.readChoices.map((x,i)=>`<button class="option ${readSel===i?(i===p.readAnswer?'correct':'wrong'):''}" data-read-choice="${i}">${x}</button>`).join('')}</div><p class="question">ลองเขียนทั้งประโยค ใช้คำเริ่มต้นช่วยได้</p><label for="writing">${p.write} …</label><input class="text-input" id="writing" maxlength="500" placeholder="พิมพ์ประโยคภาษาอังกฤษทั้งประโยค" value="${esc(lessonSession.selected.writing||'')}"><div id="writeFeedback"></div><button class="btn secondary" id="checkWrite">บันทึกคำตอบและดูตัวอย่าง</button><div class="notice" style="margin-top:16px">คำตอบอิสระบันทึกเพื่อฝึกและเทียบตัวอย่าง ระบบยังไม่ได้ตัดสินว่าถูกไวยากรณ์หรือเป็นธรรมชาติ</div>`;}
  const p=l.practice;return `<p class="eyebrow">ทดสอบท้ายบท</p><h2>เรียงคำให้เป็นประโยค</h2><p class="step-lead">แตะคำตามลำดับ คุณแก้ใหม่ได้เสมอ</p><div class="answer-line">${lessonSession.arranged.map((x,i)=>`<button class="word-chip" data-remove-word="${i}">${x}</button>`).join('')}</div><div class="word-bank">${p.arrange.map((x,i)=>lessonSession.arranged.includes(x)?'':`<button class="word-chip" data-word="${i}">${x}</button>`).join('')}</div><button class="btn secondary" id="checkArrange">ตรวจคำตอบ</button><div id="arrangeFeedback"></div><p class="question">เติมคำที่ได้ยิน</p><button class="sound-btn" data-speak="${p.fill[0]}${p.blank}${p.fill[1]}">▶</button> ${p.fill[0]} <input class="text-input" id="fill" value="${esc(lessonSession.selected.fillValue||'')}" style="width:150px;display:inline-block" aria-label="คำที่หายไป"> ${p.fill[1]}<button class="btn secondary" id="checkFill">ตรวจคำตอบ</button><div id="fillFeedback"></div>`;
 }
 
@@ -294,39 +323,61 @@ let recorder, chunks=[];
 function bindStep(l,s){
  document.querySelector('#prev').onclick=()=>{state.currentStep=Math.max(0,s-1);state.cursorUpdatedAt=Date.now();save();renderLesson(l.id);};
  document.querySelector('#next').onclick=()=>{ if(s===6)return completeLesson(l);state.currentStep=s+1;state.cursorUpdatedAt=Date.now();save();renderLesson(l.id);scrollTo(0,0);};
- if(s===3){const play=()=>speak(l.practice.listen,+document.querySelector('#speed').value);document.querySelector('#listen').onclick=play;document.querySelector('#repeat').onclick=play;document.querySelector('#reveal').onclick=()=>{lessonSession.showTranscript=!lessonSession.showTranscript;renderLesson(l.id)};document.querySelectorAll('[data-listen-choice]').forEach(b=>b.onclick=()=>{lessonSession.selected.listen=+b.dataset.listenChoice;if(+b.dataset.listenChoice!==l.practice.answer)addMistake(l.id,'ฟัง');else bump('ฟัง','listen:'+l.id);renderLesson(l.id);});}
+ if(s===3){const play=()=>speak(l.practice.listen,+document.querySelector('#speed').value);document.querySelector('#listen').onclick=play;document.querySelector('#repeat').onclick=play;document.querySelector('#reveal').onclick=()=>{lessonSession.showTranscript=!lessonSession.showTranscript;renderLesson(l.id)};document.querySelectorAll('[data-listen-choice]').forEach(b=>b.onclick=()=>{lessonSession.selected.listen=+b.dataset.listenChoice;saveDraft(l.id);if(+b.dataset.listenChoice!==l.practice.answer)addMistake(l.id,'ฟัง');else bump('ฟัง','listen:'+l.id);renderLesson(l.id);});}
  if(s===4){document.querySelector('#record').onclick=()=>toggleRecord(l);const del=document.querySelector('#deleteAudio');if(del)del.onclick=()=>{URL.revokeObjectURL(lessonSession.audioUrl);lessonSession.audioUrl=null;renderLesson(l.id);};}
- if(s===5){document.querySelectorAll('[data-read-choice]').forEach(b=>b.onclick=()=>{lessonSession.selected.read=+b.dataset.readChoice;if(+b.dataset.readChoice!==l.practice.readAnswer)addMistake(l.id,'อ่าน');else bump('อ่าน','read:'+l.id);renderLesson(l.id);});document.querySelector('#checkWrite').onclick=()=>checkWriting(l);}
- if(s===6){document.querySelector('#fill').oninput=e=>{lessonSession.selected.fillValue=e.target.value;lessonSession.selected.fillPassed=false;};document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{lessonSession.selected.arrangePassed=false;lessonSession.arranged.push(l.practice.arrange[+b.dataset.word]);renderLesson(l.id)});document.querySelectorAll('[data-remove-word]').forEach(b=>b.onclick=()=>{lessonSession.selected.arrangePassed=false;lessonSession.arranged.splice(+b.dataset.removeWord,1);renderLesson(l.id)});document.querySelector('#checkArrange').onclick=()=>{const ok=lessonSession.arranged.join(' ')===l.practice.arranged;feedback('arrangeFeedback',ok,ok?'เรียงถูกแล้ว! ประธานมาก่อน ตามด้วยกริยาและข้อมูลเพิ่มเติม':'ลองดูอีกครั้งนะ ประโยคที่ถูกคือ “'+l.practice.arranged+'”');lessonSession.selected.arrangePassed=ok;if(ok)bump('เขียน','arrange:'+l.id);else addMistake(l.id,'เรียงคำ');};document.querySelector('#checkFill').onclick=()=>{const ok=document.querySelector('#fill').value.trim().toLowerCase()===l.practice.blank.toLowerCase();feedback('fillFeedback',ok,ok?'ถูกต้อง! คุณฟังคำสำคัญได้แล้ว':'คำที่ได้ยินคือ “'+l.practice.blank+'” ลองฟังและพูดตามอีกครั้งนะ');lessonSession.selected.fillPassed=ok;if(ok)bump('ฟัง','fill:'+l.id);else addMistake(l.id,'เติมคำ');};}
+ if(s===5){document.querySelectorAll('[data-read-choice]').forEach(b=>b.onclick=()=>{lessonSession.selected.read=+b.dataset.readChoice;saveDraft(l.id);if(+b.dataset.readChoice!==l.practice.readAnswer)addMistake(l.id,'อ่าน');else bump('อ่าน','read:'+l.id);renderLesson(l.id);});document.querySelector('#writing').oninput=e=>{lessonSession.selected.writing=e.target.value;saveDraft(l.id);};document.querySelector('#checkWrite').onclick=()=>checkWriting(l);}
+ if(s===6){document.querySelector('#fill').oninput=e=>{lessonSession.selected.fillValue=e.target.value;lessonSession.selected.fillPassed=false;saveDraft(l.id);};document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{lessonSession.selected.arrangePassed=false;lessonSession.arranged.push(l.practice.arrange[+b.dataset.word]);saveDraft(l.id);renderLesson(l.id)});document.querySelectorAll('[data-remove-word]').forEach(b=>b.onclick=()=>{lessonSession.selected.arrangePassed=false;lessonSession.arranged.splice(+b.dataset.removeWord,1);saveDraft(l.id);renderLesson(l.id)});document.querySelector('#checkArrange').onclick=()=>{const ok=lessonSession.arranged.join(' ')===l.practice.arranged;feedback('arrangeFeedback',ok,ok?'เรียงตรงกับประโยคตัวอย่างแล้ว!':'ลองดูอีกครั้งนะ ประโยคที่ถูกคือ “'+l.practice.arranged+'”');lessonSession.selected.arrangePassed=ok;saveDraft(l.id);if(ok)bump('เขียน','arrange:'+l.id);else addMistake(l.id,'เรียงคำ');};document.querySelector('#checkFill').onclick=()=>{const ok=document.querySelector('#fill').value.trim().toLowerCase()===l.practice.blank.toLowerCase();feedback('fillFeedback',ok,ok?'ถูกต้อง! คุณฟังคำสำคัญได้แล้ว':'คำที่ได้ยินคือ “'+l.practice.blank+'” ลองฟังและพูดตามอีกครั้งนะ');lessonSession.selected.fillPassed=ok;saveDraft(l.id);if(ok)bump('ฟัง','fill:'+l.id);else addMistake(l.id,'เติมคำ');};}
 }
 function feedback(id,ok,text){document.querySelector('#'+id).innerHTML=`<div class="feedback ${ok?'':'wrong'}">${text}</div>`;}
-function addMistake(lesson,type){if(!state.mistakes.some(x=>x.lesson===lesson&&x.type===type))state.mistakes.push({lesson,type});save();}
+function addMistake(lesson,type){
+ const key=lesson+':'+type,event=state.mistakeEvents[key]||{wrongAt:0,clearedAt:0};
+ state.mistakeEvents[key]={...event,wrongAt:Math.max(Date.now(),state.updatedAt+1,event.wrongAt+1,event.clearedAt+1)};save();
+}
+function clearLessonMistakes(id){
+ const clearedAt=Math.max(Date.now(),state.updatedAt+1);
+ for(const [key,event] of Object.entries(state.mistakeEvents))if(Number(key.split(':')[0])===id)state.mistakeEvents[key]={...event,clearedAt:Math.max(clearedAt,event.wrongAt+1)};
+ state.mistakes=state.mistakes.filter(x=>x.lesson!==id);
+}
 function bump(type,award){if(!award||state.awards.includes(award))return;state.awards.push(award);state.skill[type]=Math.min(100,state.skill[type]+10);state.xp++;save();}
-function checkWriting(l){const val=document.querySelector('#writing').value.trim();lessonSession.selected.writing=val;let msg,ok=false;if(!val){msg='ลองเติมประโยคสั้น ๆ ก่อนนะ';}else if(val.split(/\s+/).length<3){msg='ประโยคนี้ยังสั้นมาก ลองเพิ่มกริยาหรือข้อมูล เช่น “'+l.examples[0][0]+'”';}else{ok=true;msg='โครงสร้างเบื้องต้นดูดี! คำตอบอิสระมีได้หลายแบบ ลองอ่านออกเสียงอีกครั้ง';bump('เขียน','write:'+l.id);}feedback('writeFeedback',ok,msg);}
+function checkWriting(l){
+ const val=document.querySelector('#writing').value.trim();lessonSession.selected.writing=val;saveDraft(l.id);
+ if(!val)return feedback('writeFeedback',false,'ลองเขียนประโยคสั้น ๆ ก่อนนะ');
+ const example=l.practice.writingExample;
+ feedback('writeFeedback',true,'บันทึกคำตอบเพื่อฝึกแล้ว ยังไม่ได้ตัดสินไวยากรณ์ ลองเทียบกับตัวอย่าง “'+example+'” และหลักในหน้าตัวอย่าง');
+ bump('เขียน','write:'+l.id);
+}
 async function toggleRecord(l){
  if(lessonSession.recording){recorder?.stop();lessonSession.recording=false;return;}
  if(!navigator.mediaDevices?.getUserMedia){toast('เบราว์เซอร์นี้ไม่รองรับการอัดเสียง');return;}
  try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>chunks.push(e.data);recorder.onstop=()=>{lessonSession.audioUrl=URL.createObjectURL(new Blob(chunks,{type:recorder.mimeType}));stream.getTracks().forEach(t=>t.stop());bump('พูด','speak:'+l.id);renderLesson(l.id);};recorder.start();lessonSession.recording=true;startRecognition();renderLesson(l.id);}catch{toast('ไม่สามารถใช้ไมโครโฟนได้ คุณยังฟังและพูดตามได้โดยไม่อัดเสียง');}
 }
 function startRecognition(){const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return;const rec=new R();rec.lang='en-US';rec.interimResults=false;rec.onresult=e=>lessonSession.recognitionText=e.results[0][0].transcript;rec.onerror=()=>{};rec.start();}
-function completeLesson(l){if(!lessonSession.selected.arrangePassed||!lessonSession.selected.fillPassed){toast('ตรวจคำตอบเรียงคำและเติมคำให้ถูกทั้งสองข้อก่อนจบบทนะ');return;}if(!state.completed.includes(l.id))state.completed.push(l.id);l.words.forEach(w=>{if(!state.learnedWords.some(x=>x[0]===w[0]))state.learnedWords.push(w)});state.mistakes=state.mistakes.filter(x=>x.lesson!==l.id);state.currentLesson=lessons.find(next=>!state.completed.includes(next.id))?.id||l.id;state.currentStep=0;state.cursorUpdatedAt=Date.now();save();shell(`<section class="lesson-shell"><article class="card step-card review-score"><div class="trophy">🎉</div><p class="eyebrow">จบบทที่ ${l.id} แล้ว</p><h2>เก่งมาก! วันนี้คุณทำได้อีกหนึ่งก้าว</h2><p class="step-lead">ไม่จำเป็นต้องสมบูรณ์แบบ ทุกครั้งที่กลับมาทบทวน คุณจะเข้าใจชัดขึ้น</p><ul class="summary-list"><li>✓ รู้จักคำศัพท์ใหม่ ${l.words.length} คำ</li><li>✓ ตรวจคำตอบเรียงคำท้ายบทแล้ว</li><li>✓ ตรวจคำตอบเติมคำท้ายบทแล้ว</li></ul><div class="actions" style="justify-content:center"><button class="btn secondary" data-nav="progress">ดูความก้าวหน้า</button>${l.id<lessons.length?`<button class="btn primary" data-lesson="${l.id+1}">ไปบทถัดไป →</button>`:`<button class="btn primary" data-nav="today">กลับหน้าวันนี้</button>`}</div></article></section>`);}
+function completeLesson(l){if(!lessonSession.selected.arrangePassed||!lessonSession.selected.fillPassed){toast('ตรวจคำตอบเรียงคำและเติมคำให้ถูกทั้งสองข้อก่อนจบบทนะ');return;}if(!state.completed.includes(l.id))state.completed.push(l.id);l.words.forEach(w=>{if(!state.learnedWords.some(x=>x[0]===w[0]))state.learnedWords.push(w)});clearLessonMistakes(l.id);state.currentLesson=lessons.find(next=>!state.completed.includes(next.id))?.id||l.id;state.currentStep=0;state.cursorUpdatedAt=Date.now();save();shell(`<section class="lesson-shell"><article class="card step-card review-score"><div class="trophy">🎉</div><p class="eyebrow">จบบทที่ ${l.id} แล้ว</p><h2>เก่งมาก! วันนี้คุณทำได้อีกหนึ่งก้าว</h2><p class="step-lead">ไม่จำเป็นต้องสมบูรณ์แบบ ทุกครั้งที่กลับมาทบทวน คุณจะเข้าใจชัดขึ้น</p><ul class="summary-list"><li>✓ รู้จักคำศัพท์ใหม่ ${l.words.length} คำ</li><li>✓ ตรวจคำตอบเรียงคำท้ายบทแล้ว</li><li>✓ ตรวจคำตอบเติมคำท้ายบทแล้ว</li></ul><div class="actions" style="justify-content:center"><button class="btn secondary" data-nav="progress">ดูความก้าวหน้า</button>${l.id<lessons.length?`<button class="btn primary" data-lesson="${l.id+1}">ไปบทถัดไป →</button>`:`<button class="btn primary" data-nav="today">กลับหน้าวันนี้</button>`}</div></article></section>`);}
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='english-with-yuri-data.json';a.click();URL.revokeObjectURL(a.href);}
-function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);state=mergeProgress(state,normalizeProgress(parsed));state.cursorUpdatedAt=Date.now();save();renderProgress();toast('นำเข้าข้อมูลสำเร็จ');}catch{toast('ไฟล์ข้อมูลไม่ถูกต้อง');}};reader.readAsText(file);}
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);state=importProgress(state,parsed);state.cursorUpdatedAt=Date.now();save();renderProgress();toast('นำเข้าข้อมูลสำเร็จ');}catch{toast('ไฟล์ข้อมูลไม่ถูกต้อง');}};reader.readAsText(file);}
 async function resetData(){
  if(!confirm(user?'เริ่มความก้าวหน้าของบัญชีนี้ใหม่ทั้งในเครื่องและคลาวด์? สำรองข้อมูลก่อนถ้าต้องการเก็บของเดิม':'เริ่มความก้าวหน้าในเครื่องนี้ใหม่?'))return;
- const next=freshProgress();next.updatedAt=Date.now();next.cursorUpdatedAt=next.updatedAt;
- try{clearTimeout(syncTimer);if(syncing)await syncing;if(user){if(!cloudReady)throw new Error('offline');await auth.putProgress(user.id,next);}state=next;writeLocal();syncState=user?'saved':'local';renderProgress();toast('เริ่มความก้าวหน้าใหม่แล้ว');}
+ let next=freshProgress();next.updatedAt=Math.max(Date.now(),state.updatedAt+1);next.cursorUpdatedAt=next.updatedAt;next.resetAt=next.updatedAt;
+ try{clearTimeout(syncTimer);if(syncing)await syncing;if(user){if(!cloudReady)throw new Error('offline');cloudRow=await saveCloudProgress(auth,user.id,next,{reset:true});next=cloudRow.state;}state=next;writeLocal();syncState=user?'saved':'local';renderProgress();toast('เริ่มความก้าวหน้าใหม่แล้ว');}
  catch{toast('รีเซ็ตยังไม่สำเร็จ ข้อมูลเดิมยังอยู่ กรุณาเชื่อมต่อและลองใหม่');}
 }
 
 
 window.addEventListener('hashchange',()=>{
  const hash=location.hash.slice(1)||'today';
- if(hash.includes('access_token=')||hash.includes('error='))return;
+ if(hash.includes('access_token=')||hash.includes('error=')||hash===page)return;
+ if(hash.startsWith('learn-'))lessonSession=sessionForLesson(Number(hash.split('-')[1]));
  page=hash;render();
 });
 window.addEventListener('online',()=>{if(user)retryCloud().catch(()=>{syncState='error';updateSyncLabel();});});
-window.addEventListener('pagehide',()=>{clearTimeout(syncTimer);if(user&&cloudReady)syncCloud().catch(()=>{});});
+window.addEventListener('pagehide',flushProgressInBackground);
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='hidden'){flushProgressInBackground();return;}
+ if(user)retryCloud().then(()=>{
+   if(page.startsWith('learn-')){page='learn-'+state.currentLesson;lessonSession=sessionForLesson(state.currentLesson);history.replaceState(null,'',location.pathname+location.search+'#'+page);}
+   render();
+ }).catch(()=>{syncState='error';updateSyncLabel();});
+});
 render();
 async function initializeAccount(){
  const hash=location.hash;

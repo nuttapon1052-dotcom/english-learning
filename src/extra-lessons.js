@@ -54,15 +54,15 @@ export const extraLessons = [
         "แคน ไอ เพย์ บาย คาร์ด"
       ]
     ],
-    "grammar": "<b>How much is + สิ่งของหนึ่งชิ้น?</b> ใช้ถามราคา ถ้าหลายชิ้นใช้ <b>How much are…?</b> ส่วน <b>Can I + กริยา?</b> ใช้ขออนุญาตอย่างสุภาพ",
+    "grammar": "เมื่อถามราคาใช้ <b>How much is + คำนามเอกพจน์หรือคำนามนับไม่ได้?</b> เช่น this bag หรือ this water ส่วนคำนามพหูพจน์ใช้ <b>How much are + คำนามพหูพจน์?</b> เช่น these bags<br><b>Can I + กริยารูปเดิม?</b> ใช้ขออนุญาต เช่น Can I pay by card?",
     "practice": {
       "listen": "How much is this bag?",
       "choices": [
-        "กระเป๋าใบนี้ราคาเท่าไร",
         "กระเป๋าใบนี้สีอะไร",
+        "กระเป๋าใบนี้ราคาเท่าไร",
         "มีกระเป๋าไหม"
       ],
-      "answer": 0,
+      "answer": 1,
       "arrange": [
         "by",
         "Can",
@@ -125,9 +125,9 @@ export const extraLessons = [
         "เนียร์"
       ],
       [
-        "across",
-        "อีกฝั่ง / ข้าม",
-        "อะ-ครอส"
+        "across from",
+        "ตรงข้าม",
+        "อะ-ครอส ฟรอม"
       ]
     ],
     "examples": [
@@ -151,11 +151,11 @@ export const extraLessons = [
     "practice": {
       "listen": "Go straight and turn left.",
       "choices": [
-        "ตรงไปแล้วเลี้ยวซ้าย",
         "เลี้ยวขวาแล้วหยุด",
-        "ข้ามถนนแล้วกลับมา"
+        "ข้ามถนนแล้วกลับมา",
+        "ตรงไปแล้วเลี้ยวซ้าย"
       ],
-      "answer": 0,
+      "answer": 2,
       "arrange": [
         "station?",
         "Where",
@@ -171,11 +171,11 @@ export const extraLessons = [
       "read": "The library is near the station. Walk straight and turn right at the bank.",
       "question": "ต้องเลี้ยวที่ไหน?",
       "readChoices": [
-        "ธนาคาร",
         "โรงเรียน",
+        "ธนาคาร",
         "ร้านอาหาร"
       ],
-      "readAnswer": 0,
+      "readAnswer": 1,
       "write": "Go straight",
       "accepts": [
         "go",
@@ -265,11 +265,11 @@ export const extraLessons = [
       "read": "Nok orders tea without sugar and a sandwich. She asks for the bill after eating.",
       "question": "Nok สั่งชาแบบไหน?",
       "readChoices": [
-        "ไม่ใส่น้ำตาล",
         "ใส่น้ำตาลมาก",
-        "ใส่นม"
+        "ใส่นม",
+        "ไม่ใส่น้ำตาล"
       ],
-      "readAnswer": 0,
+      "readAnswer": 2,
       "write": "I would like",
       "accepts": [
         "i would like",
@@ -333,15 +333,15 @@ export const extraLessons = [
         "ไอ แฮฟ แอน อะ-พอยนท์-เมินท์ ทู-มอ-โร"
       ]
     ],
-    "grammar": "ใช้ <b>on + วัน</b>, <b>at + เวลา</b> และ <b>in + ช่วงของวัน</b> เช่น in the morning ส่วน tomorrow ไม่ต้องมีคำบุพบทนำหน้า <b>Let's + กริยา</b> ใช้ชวนทำบางอย่าง",
+    "grammar": "ใช้ <b>on + วัน</b>, <b>at + เวลา</b> และ <b>in + ช่วงของวัน</b> เช่น in the morning หรือ in the afternoon ส่วนตอนกลางคืนใช้ at night<br><b>tomorrow</b> ไม่ต้องมีคำบุพบทนำหน้า และ <b>Let’s + กริยารูปเดิม</b> ใช้ชวนทำบางอย่าง ถ้าเวลายังไม่ชัดให้เติม a.m. / p.m. หรือ in the afternoon เช่น at three in the afternoon",
     "practice": {
       "listen": "Let's meet at three.",
       "choices": [
-        "เจอกันตอนสามโมง",
         "เจอกันสามคน",
+        "เจอกันตอนสามโมง",
         "รออีกสามวัน"
       ],
-      "answer": 0,
+      "answer": 1,
       "arrange": [
         "Friday?",
         "you",
@@ -430,11 +430,11 @@ export const extraLessons = [
     "practice": {
       "listen": "You should wear a jacket.",
       "choices": [
-        "คุณควรใส่เสื้อแจ็กเก็ต",
         "คุณซื้อเสื้อแล้ว",
-        "คุณไม่ชอบเสื้อ"
+        "คุณไม่ชอบเสื้อ",
+        "คุณควรใส่เสื้อแจ็กเก็ต"
       ],
-      "answer": 0,
+      "answer": 2,
       "arrange": [
         "today.",
         "is",
@@ -450,11 +450,11 @@ export const extraLessons = [
       "read": "It is cold and rainy in London today. May takes a jacket and an umbrella.",
       "question": "May นำอะไรไป?",
       "readChoices": [
-        "เสื้อแจ็กเก็ตและร่ม",
         "หมวกและแว่น",
+        "เสื้อแจ็กเก็ตและร่ม",
         "รองเท้าแตะ"
       ],
-      "readAnswer": 0,
+      "readAnswer": 1,
       "write": "It is",
       "accepts": [
         "it is",
@@ -542,11 +542,11 @@ export const extraLessons = [
       "read": "Tom has a headache. He calls the clinic and makes an appointment with a doctor.",
       "question": "Tom นัดพบใคร?",
       "readChoices": [
-        "แพทย์",
         "เพื่อน",
-        "ครู"
+        "ครู",
+        "แพทย์"
       ],
-      "readAnswer": 0,
+      "readAnswer": 2,
       "write": "I have",
       "accepts": [
         "i have",
@@ -570,17 +570,17 @@ export const extraLessons = [
       ],
       [
         "visited",
-        "ไปเยี่ยมแล้ว",
+        "ไปเยี่ยม (รูปอดีตของ visit)",
         "วิ-ซิ-ทิด"
       ],
       [
         "watched",
-        "ดูแล้ว",
+        "ดู (รูปอดีตของ watch)",
         "วอทช์ท"
       ],
       [
         "played",
-        "เล่นแล้ว",
+        "เล่น (รูปอดีตของ play)",
         "เพลย์ด"
       ],
       [
@@ -592,6 +592,26 @@ export const extraLessons = [
         "weekend",
         "สุดสัปดาห์",
         "วีค-เอนด์"
+      ],
+      [
+        "went",
+        "ไป (รูปอดีตของ go)",
+        "เว็นท์"
+      ],
+      [
+        "was",
+        "เป็น / อยู่ / คือ (อดีต: I/he/she/it)",
+        "วอซ"
+      ],
+      [
+        "were",
+        "เป็น / อยู่ / คือ (อดีต: you/we/they)",
+        "เวอร์"
+      ],
+      [
+        "did",
+        "รูปอดีตของ do / คำช่วยถามอดีต",
+        "ดิด"
       ]
     ],
     "examples": [
@@ -609,17 +629,37 @@ export const extraLessons = [
         "Did you play football?",
         "คุณได้เล่นฟุตบอลไหม",
         "ดิด ยู เพลย์ ฟุท-บอล"
+      ],
+      [
+        "I went home early.",
+        "ฉันกลับบ้านเร็ว",
+        "ไอ เว็นท์ โฮม เออร์-ลี"
+      ],
+      [
+        "She was tired yesterday.",
+        "เมื่อวานเธอเหนื่อย",
+        "ชี วอซ ไทเอิร์ด เยส-เทอร์-เดย์"
+      ],
+      [
+        "We were at home last night.",
+        "เมื่อคืนเราอยู่บ้าน",
+        "วี เวอร์ แอท โฮม ลาสท์ ไนท์"
+      ],
+      [
+        "I did not watch TV yesterday.",
+        "เมื่อวานฉันไม่ได้ดูทีวี",
+        "ไอ ดิด น็อท วอทช์ ที-วี เยส-เทอร์-เดย์"
       ]
     ],
-    "grammar": "<b>Past simple</b> ใช้กับสิ่งที่จบแล้ว กริยาปกติมักเติม -ed เช่น visited เมื่อถามด้วย <b>Did</b> กริยาที่ตามมาจะกลับเป็นรูปเดิม เช่น Did you play ไม่ใช่ Did you played",
+    "grammar": "<b>Past simple</b> ใช้เล่าเหตุการณ์หรือสภาพในอดีต กริยาปกติมักเติม -ed เช่น visited แต่บางคำเปลี่ยนรูป เช่น <b>go → went</b><br>ถามด้วย <b>Did + ประธาน + กริยารูปเดิม?</b> และปฏิเสธด้วย <b>did not + กริยารูปเดิม</b> ไม่ใช้ Did you played<br>verb to be เปลี่ยนเป็น <b>I / he / she / it → was</b> และ <b>you / we / they → were</b> เช่น She was tired. คำถามใช้ Was / Were หน้าประธานโดยไม่เติม did",
     "practice": {
       "listen": "We watched a movie last night.",
       "choices": [
-        "เราดูหนังเมื่อคืน",
         "เราจะดูหนังพรุ่งนี้",
+        "เราดูหนังเมื่อคืน",
         "เรากำลังดูหนัง"
       ],
-      "answer": 0,
+      "answer": 1,
       "arrange": [
         "yesterday.",
         "my friend",
@@ -708,11 +748,11 @@ export const extraLessons = [
     "practice": {
       "listen": "She is going to learn English.",
       "choices": [
-        "เธอมีแผนจะเรียนอังกฤษ",
         "เธอเรียนอังกฤษเมื่อวาน",
-        "เธอไม่ชอบอังกฤษ"
+        "เธอไม่ชอบอังกฤษ",
+        "เธอมีแผนจะเรียนอังกฤษ"
       ],
-      "answer": 0,
+      "answer": 2,
       "arrange": [
         "travel.",
         "going to",
@@ -728,11 +768,11 @@ export const extraLessons = [
       "read": "Ben is going to visit Japan next month. He is going to save money and learn some Japanese.",
       "question": "Ben จะไปญี่ปุ่นเมื่อไร?",
       "readChoices": [
-        "เดือนหน้า",
         "เมื่อวาน",
+        "เดือนหน้า",
         "สัปดาห์ก่อน"
       ],
-      "readAnswer": 0,
+      "readAnswer": 1,
       "write": "I am going to",
       "accepts": [
         "i am going to",
@@ -796,7 +836,7 @@ export const extraLessons = [
         "ดิส แชร์ อิส มอร์ คัมฟ์-เทอะ-เบิล"
       ]
     ],
-    "grammar": "คำคุณศัพท์สั้นมักเติม <b>-er + than</b> เช่น cheaper than ส่วนคำยาวมักใช้ <b>more + คำคุณศัพท์</b> เช่น more comfortable ระวัง big เปลี่ยนเป็น bigger",
+    "grammar": "คำคุณศัพท์สั้นหลายคำเติม <b>-er</b> เช่น cheaper เมื่อระบุสิ่งที่เปรียบเทียบใช้ <b>cheaper than…</b> ส่วนคำยาวหลายคำใช้ <b>more + คำคุณศัพท์ + than…</b> เช่น more comfortable than that chair<br>ระวัง big → bigger และ good → better ไม่ใช่ gooder หากคู่เปรียบเทียบชัดจากบริบทแล้วอาจไม่พูด than ซ้ำ เช่น This chair is more comfortable.",
     "practice": {
       "listen": "The train is faster than the bus.",
       "choices": [
@@ -821,11 +861,11 @@ export const extraLessons = [
       "read": "The blue bag costs ten dollars. The red bag costs fifteen dollars. Mali chooses the blue bag because it is cheaper.",
       "question": "กระเป๋าสีไหนถูกกว่า?",
       "readChoices": [
-        "สีน้ำเงิน",
         "สีแดง",
-        "ราคาเท่ากัน"
+        "ราคาเท่ากัน",
+        "สีน้ำเงิน"
       ],
-      "readAnswer": 0,
+      "readAnswer": 2,
       "write": "This is",
       "accepts": [
         "than",
@@ -875,9 +915,9 @@ export const extraLessons = [
     ],
     "examples": [
       [
-        "I have a reservation.",
-        "ฉันจองไว้แล้ว",
-        "ไอ แฮฟ อะ เร-เซอร์-เว-เชิน"
+        "I have a reservation under the name Mali.",
+        "ฉันจองไว้ในชื่อ Mali",
+        "ไอ แฮฟ อะ เร-เซอร์-เว-เชิน อัน-เดอร์ เดอะ เนม มา-ลี"
       ],
       [
         "What time is breakfast?",
@@ -890,15 +930,15 @@ export const extraLessons = [
         "เดอะ ไว-ไฟ อิส นอท เวิร์ค-คิง"
       ]
     ],
-    "grammar": "ใช้ <b>I have a reservation under + ชื่อ</b> เพื่อบอกชื่อผู้จอง และ <b>What time…?</b> เพื่อถามเวลา ส่วน <b>is not working</b> อธิบายสิ่งที่ใช้งานไม่ได้ตอนนี้",
+    "grammar": "ใช้ <b>I have a reservation under the name + ชื่อ</b> เพื่อบอกชื่อผู้จอง เช่น under the name Mali และ <b>What time is breakfast?</b> เพื่อถามเวลาอาหารเช้า<br><b>is not working</b> อธิบายสิ่งที่ใช้งานไม่ได้ตอนนี้ เช่น The Wi-Fi is not working.",
     "practice": {
       "listen": "What time is breakfast?",
       "choices": [
-        "อาหารเช้าเริ่มกี่โมง",
         "อาหารเช้าราคาเท่าไร",
+        "อาหารเช้าเริ่มกี่โมง",
         "ห้องอาหารอยู่ที่ไหน"
       ],
-      "answer": 0,
+      "answer": 1,
       "arrange": [
         "a",
         "I",
@@ -987,11 +1027,11 @@ export const extraLessons = [
     "practice": {
       "listen": "Thank you for your message.",
       "choices": [
-        "ขอบคุณสำหรับข้อความ",
         "กรุณาส่งเงินมา",
-        "ฉันไม่ได้รับข้อความ"
+        "ฉันไม่ได้รับข้อความ",
+        "ขอบคุณสำหรับข้อความ"
       ],
-      "answer": 0,
+      "answer": 2,
       "arrange": [
         "for",
         "Thank you",
@@ -1007,11 +1047,11 @@ export const extraLessons = [
       "read": "Hello Ben, Thank you for your message. Our meeting is on Monday at nine. Best regards, Mali.",
       "question": "ประชุมเมื่อไร?",
       "readChoices": [
-        "จันทร์เก้าโมง",
         "อังคารสิบโมง",
+        "จันทร์เก้าโมง",
         "ศุกร์บ่าย"
       ],
-      "readAnswer": 0,
+      "readAnswer": 1,
       "write": "Hello",
       "accepts": [
         "hello",
@@ -1074,6 +1114,16 @@ export const extraLessons = [
         "Can you see my screen?",
         "คุณเห็นหน้าจอฉันไหม",
         "แคน ยู ซี มาย สครีน"
+      ],
+      [
+        "I think this is a good idea.",
+        "ฉันคิดว่านี่เป็นความคิดที่ดี",
+        "ไอ ธิงค์ ดิส อิส อะ กูด ไอ-เดีย"
+      ],
+      [
+        "Can we meet on Monday at nine?",
+        "เราเจอกันวันจันทร์เก้าโมงได้ไหม",
+        "แคน วี มีท ออน มัน-เดย์ แอท ไนน์"
       ]
     ],
     "grammar": "<b>Could you + กริยา?</b> ใช้ขอให้ผู้ฟังช่วยทำบางอย่าง ใช้ <b>I think…</b> นำหน้าความคิดเห็น และ <b>I agree with…</b> เพื่อบอกว่าเห็นด้วยกับคนหรือความคิด",
@@ -1100,11 +1150,11 @@ export const extraLessons = [
       "read": "During the online meeting, Tom cannot hear Ben clearly. He asks Ben to repeat the last sentence.",
       "question": "ทำไม Tom ขอให้พูดซ้ำ?",
       "readChoices": [
-        "ได้ยินไม่ชัด",
         "ไม่เห็นหน้าจอ",
-        "ไม่เห็นด้วย"
+        "ไม่เห็นด้วย",
+        "ได้ยินไม่ชัด"
       ],
-      "readAnswer": 0,
+      "readAnswer": 2,
       "write": "I think",
       "accepts": [
         "i think",
@@ -1173,11 +1223,11 @@ export const extraLessons = [
     "practice": {
       "listen": "I will call you back.",
       "choices": [
-        "ฉันจะโทรกลับ",
         "ฉันโทรผิด",
+        "ฉันจะโทรกลับ",
         "ฉันไม่อยากโทร"
       ],
-      "answer": 0,
+      "answer": 1,
       "arrange": [
         "a message?",
         "Can",
@@ -1231,7 +1281,7 @@ export const extraLessons = [
       ],
       [
         "helpful",
-        "ช่วยเหลือได้ดี",
+        "มีประโยชน์ / ช่วยได้",
         "เฮลป์-ฟูล"
       ],
       [
@@ -1266,11 +1316,11 @@ export const extraLessons = [
     "practice": {
       "listen": "Could you confirm the time?",
       "choices": [
-        "ช่วยยืนยันเวลาได้ไหม",
         "ช่วยซื้อตั๋ว",
-        "รถออกไปแล้วใช่ไหม"
+        "รถออกไปแล้วใช่ไหม",
+        "ช่วยยืนยันเวลาได้ไหม"
       ],
-      "answer": 0,
+      "answer": 2,
       "arrange": [
         "like",
         "I",
@@ -1286,11 +1336,11 @@ export const extraLessons = [
       "read": "Nida buys a return ticket to Oxford. The train leaves at ten. She confirms the time and thanks the staff.",
       "question": "รถไฟออกเวลาใด?",
       "readChoices": [
-        "สิบโมง",
         "เก้าโมง",
+        "สิบโมง",
         "เที่ยง"
       ],
-      "readAnswer": 0,
+      "readAnswer": 1,
       "write": "I would like",
       "accepts": [
         "i would like",
