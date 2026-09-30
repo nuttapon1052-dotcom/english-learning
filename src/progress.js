@@ -94,6 +94,12 @@ export function mergeProgress(local, remote) {
     skill: Object.fromEntries(skillNames.map(k=>[k,Math.max(a.skill[k],b.skill[k])]))
   });
 }
+// Explicit imports cross storage namespaces; their reset history must not
+// replace the target account's progress or revive it through automatic sync.
+export function importProgress(current,imported){
+ const target=normalizeProgress(current);
+ return mergeProgress(target,{...normalizeProgress(imported),resetAt:target.resetAt});
+}
 export function accountKey(userId) { return userId ? STORAGE_KEY + ':' + userId : STORAGE_KEY; }
 export function todayKey() {
   const d = new Date();

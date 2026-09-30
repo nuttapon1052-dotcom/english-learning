@@ -20,7 +20,7 @@ export function createAuthClient({ url, key, storage = globalThis.localStorage, 
   async function request(path, { method='GET', body, token, headers={}, keepalive=false } = {}) {
     if (!configured) throw new Error('ยังไม่ได้เปิดระบบบัญชีผู้ใช้ กรุณาเรียนแบบไม่สมัครก่อน');
     const response = await fetchImpl(base + path, {
-      method, keepalive, headers: { apikey: key, 'Content-Type':'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...headers },
+      method, keepalive, cache:'no-store', headers: { apikey: key, 'Content-Type':'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...headers },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
       signal: AbortSignal.timeout(15000)
     });

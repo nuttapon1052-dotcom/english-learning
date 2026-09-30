@@ -1,6 +1,6 @@
 import './styles.css';
 import { lessons, roadmap } from './lessons.js';
-import { freshProgress, normalizeProgress, mergeProgress, accountKey, todayKey } from './progress.js';
+import { freshProgress, normalizeProgress, mergeProgress, importProgress, accountKey, todayKey } from './progress.js';
 import { createAuthClient } from './auth.js';
 import { saveCloudProgress } from './cloud-progress.js';
 import { loadAuthConfig } from './config.js';
@@ -223,7 +223,7 @@ function renderAccount() {
   if(authBusy) { shell('<section class="account-shell card" role="status"><p class="eyebrow">YOUR LEARNING ACCOUNT</p><h1>กำลังเชื่อมต่อบัญชี…</h1><p>รอสักครู่ ความก้าวหน้าจะถูกโหลดแยกตามบัญชี</p></section>');return; }
   if(user && !recoveryMode) {
     const name=user.user_metadata?.display_name || user.user_metadata?.full_name || user.email;
-    const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp;
+    const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp||guest.activity.length||Object.keys(guest.lessonDrafts).length||guest.assessment!==null;
     shell(`<header class="page-head"><p class="eyebrow">YOUR OWN LEARNING SPACE</p><h1>สวัสดี ${esc(name)}.</h1><p>${esc(user.email)}</p></header><div class="today-grid"><article class="card side-card"><span class="pill">บัญชีผู้เรียน</span><h2>ทุกก้าว เป็นของคุณ</h2><p data-sync-status>${syncText()}</p><p>เรียนแล้ว ${state.completed.length} จาก ${lessons.length} บท · เรียนค้างที่บท ${state.currentLesson}</p><div class="actions"><button class="btn primary" data-lesson="${state.currentLesson}">เรียนต่อ →</button><button class="btn secondary" id="syncNow">ซิงก์อีกครั้ง</button></div>${isTeacher?'<div class="settings-block"><h3>สำหรับครู</h3><p>ดูรายชื่อผู้เรียนและความก้าวหน้าจากข้อมูลที่ซิงก์แล้ว</p><button class="btn secondary" data-nav="teacher">เปิดหน้าผู้เรียน ↗</button></div>':''}</article><aside class="card side-card"><h2>จัดการบัญชี</h2><p>เมื่อออกจากระบบ เว็บกลับไปใช้ความก้าวหน้าแบบไม่สมัคร ข้อมูลแต่ละบัญชีแยกกัน</p>${hasGuest?'<div class="notice">พบความก้าวหน้าแบบไม่สมัครในเครื่องนี้ นำเข้าเฉพาะเมื่อเป็นข้อมูลของคุณเอง</div><button class="btn secondary" id="importGuest">นำความก้าวหน้าในเครื่องเข้าบัญชีนี้</button>':''}<div class="settings-block"><button class="btn secondary" id="passwordEmail">ส่งลิงก์เปลี่ยนรหัสผ่าน</button><button class="btn danger" id="logout">ออกจากระบบ</button></div><p id="accountFeedback" role="status"></p></aside></div>`);
     document.querySelector('#syncNow').onclick=async e=>{e.target.disabled=true;try{await retryCloud();toast('ซิงก์ความก้าวหน้าแล้ว');}catch{toast('ยังเชื่อมต่อไม่ได้ ข้อมูลในเครื่องยังอยู่');}finally{e.target.disabled=false;updateSyncLabel();}};
     document.querySelector('#passwordEmail').onclick=async e=>{e.target.disabled=true;try{await auth.recover(user.email);document.querySelector('#accountFeedback').textContent='ส่งคำขอแล้ว โปรดตรวจอีเมลและกล่องสแปม';}catch(err){document.querySelector('#accountFeedback').textContent=authError(err);}finally{e.target.disabled=false;}};
@@ -233,7 +233,7 @@ function renderAccount() {
       catch(err){toast(authError(err));e.target.disabled=false;}
     };
     document.querySelector('#importGuest')?.addEventListener('click',()=>{
-      if(confirm('ยืนยันว่าความก้าวหน้าแบบไม่สมัครในเครื่องนี้เป็นของคุณ และต้องการรวมกับบัญชีนี้?')){state=mergeProgress(state,guest);save();renderAccount();}
+      if(confirm('ยืนยันว่าความก้าวหน้าแบบไม่สมัครในเครื่องนี้เป็นของคุณ และต้องการรวมกับบัญชีนี้?')){state=importProgress(state,guest);save();renderAccount();}
     });
     return;
   }
@@ -354,7 +354,7 @@ async function toggleRecord(l){
 function startRecognition(){const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return;const rec=new R();rec.lang='en-US';rec.interimResults=false;rec.onresult=e=>lessonSession.recognitionText=e.results[0][0].transcript;rec.onerror=()=>{};rec.start();}
 function completeLesson(l){if(!lessonSession.selected.arrangePassed||!lessonSession.selected.fillPassed){toast('ตรวจคำตอบเรียงคำและเติมคำให้ถูกทั้งสองข้อก่อนจบบทนะ');return;}if(!state.completed.includes(l.id))state.completed.push(l.id);l.words.forEach(w=>{if(!state.learnedWords.some(x=>x[0]===w[0]))state.learnedWords.push(w)});clearLessonMistakes(l.id);state.currentLesson=lessons.find(next=>!state.completed.includes(next.id))?.id||l.id;state.currentStep=0;state.cursorUpdatedAt=Date.now();save();shell(`<section class="lesson-shell"><article class="card step-card review-score"><div class="trophy">🎉</div><p class="eyebrow">จบบทที่ ${l.id} แล้ว</p><h2>เก่งมาก! วันนี้คุณทำได้อีกหนึ่งก้าว</h2><p class="step-lead">ไม่จำเป็นต้องสมบูรณ์แบบ ทุกครั้งที่กลับมาทบทวน คุณจะเข้าใจชัดขึ้น</p><ul class="summary-list"><li>✓ รู้จักคำศัพท์ใหม่ ${l.words.length} คำ</li><li>✓ ตรวจคำตอบเรียงคำท้ายบทแล้ว</li><li>✓ ตรวจคำตอบเติมคำท้ายบทแล้ว</li></ul><div class="actions" style="justify-content:center"><button class="btn secondary" data-nav="progress">ดูความก้าวหน้า</button>${l.id<lessons.length?`<button class="btn primary" data-lesson="${l.id+1}">ไปบทถัดไป →</button>`:`<button class="btn primary" data-nav="today">กลับหน้าวันนี้</button>`}</div></article></section>`);}
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='english-with-yuri-data.json';a.click();URL.revokeObjectURL(a.href);}
-function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);state=mergeProgress(state,normalizeProgress(parsed));state.cursorUpdatedAt=Date.now();save();renderProgress();toast('นำเข้าข้อมูลสำเร็จ');}catch{toast('ไฟล์ข้อมูลไม่ถูกต้อง');}};reader.readAsText(file);}
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);state=importProgress(state,parsed);state.cursorUpdatedAt=Date.now();save();renderProgress();toast('นำเข้าข้อมูลสำเร็จ');}catch{toast('ไฟล์ข้อมูลไม่ถูกต้อง');}};reader.readAsText(file);}
 async function resetData(){
  if(!confirm(user?'เริ่มความก้าวหน้าของบัญชีนี้ใหม่ทั้งในเครื่องและคลาวด์? สำรองข้อมูลก่อนถ้าต้องการเก็บของเดิม':'เริ่มความก้าวหน้าในเครื่องนี้ใหม่?'))return;
  let next=freshProgress();next.updatedAt=Math.max(Date.now(),state.updatedAt+1);next.cursorUpdatedAt=next.updatedAt;next.resetAt=next.updatedAt;

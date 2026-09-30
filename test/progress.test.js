@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {freshProgress,normalizeProgress,mergeProgress,accountKey} from '../src/progress.js';
+import {freshProgress,normalizeProgress,mergeProgress,importProgress,accountKey} from '../src/progress.js';
 
 test('untrusted imports cannot inject lesson content or invalid progress',()=>{
  const p=normalizeProgress({completed:[1,1,24,99,'2'],currentLesson:99,currentStep:40,skill:{ฟัง:999,พูด:-4},learnedWords:[['hello','<img onerror=alert(1)>','bad'],['evil','bad','bad']],awards:['listen:1','listen:1','listen:99']});
@@ -46,4 +46,11 @@ test('mistake review merges corrections without reviving cleared errors',()=>{
  const p=mergeProgress(a,b);assert.deepEqual(p.mistakes,[{lesson:3,type:'อ่าน'}]);
  const newError={...freshProgress(),mistakeEvents:{'2:ฟัง':{wrongAt:30,clearedAt:0}}};
  assert.ok(mergeProgress(p,newError).mistakes.some(m=>m.lesson===2));
+});
+
+test('explicit guest and backup imports merge data without inheriting another namespace reset',()=>{
+ const account={...freshProgress(),completed:[5],resetAt:100,updatedAt:300};
+ const guest={...freshProgress(),completed:[2],resetAt:999,updatedAt:400};
+ const p=importProgress(account,guest);
+ assert.deepEqual(p.completed,[2,5]);assert.equal(p.resetAt,100);
 });
