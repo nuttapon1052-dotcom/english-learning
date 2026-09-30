@@ -104,13 +104,13 @@ function bindCommon() {
   document.querySelectorAll('[data-speak]').forEach(b=>b.onclick=()=>speak(b.dataset.speak));
 }
 function navigate(next) {
-  if(authBusy)return;
   if(lessonSession.recording){toast('หยุดอัดเสียงก่อนเปลี่ยนหน้าครับ');return;}
   page=next; location.hash=next; render(); scrollTo(0,0);
 }
 function speak(text,rate=1) { if(!('speechSynthesis' in window))return toast('อุปกรณ์นี้ไม่รองรับเสียงสังเคราะห์');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate;speechSynthesis.speak(u); }
 function toast(text) { document.querySelector('.toast')?.remove();const el=document.createElement('div');el.className='toast';el.setAttribute('role','status');el.textContent=text;document.body.append(el);setTimeout(()=>el.remove(),4000); }
 function render() {
+  if(authBusy && page==='account')return renderAccount();
   if(authBusy){shell('<section class="card account-shell" role="status"><p class="eyebrow">WELCOME TO YOUR LEARNING SPACE</p><h2>กำลังเตรียมพื้นที่เรียนรู้…</h2><p>รอสักครู่</p></section>');return;}
   if(page.startsWith('learn-'))return renderLesson(+page.split('-')[1]);
   const views={today:renderToday,lessons:renderLessons,practice:renderPractice,vocab:renderVocab,progress:renderProgress,assessment:renderAssessment,account:renderAccount,teacher:renderTeacher};
@@ -192,7 +192,7 @@ function renderProgress() {
 }
 
 function renderAccount() {
-  if(authBusy) { shell('<section class="account-shell card"><p class="eyebrow">YOUR LEARNING ACCOUNT</p><h1>กำลังเชื่อมต่อบัญชี…</h1><p>รอสักครู่ ความก้าวหน้าจะถูกโหลดแยกตามบัญชี</p></section>');return; }
+  if(authBusy) { shell('<section class="account-shell card" role="status"><p class="eyebrow">YOUR LEARNING ACCOUNT</p><h1>กำลังเชื่อมต่อบัญชี…</h1><p>รอสักครู่ ความก้าวหน้าจะถูกโหลดแยกตามบัญชี</p></section>');return; }
   if(user && !recoveryMode) {
     const name=user.user_metadata?.display_name || user.email;
     const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp;

@@ -9,6 +9,7 @@ for (const width of [1440,390]) {
   try {
    await page.locator('.account-trigger').click();
    await expect(page).toHaveURL(/#account$/);
+   await expect(page.getByRole('heading',{name:'กำลังเชื่อมต่อบัญชี…'})).toBeVisible();
   } finally {release();}
   await expect(page.locator('#authForm')).toBeVisible();
  });
