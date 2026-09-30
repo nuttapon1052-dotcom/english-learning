@@ -52,6 +52,11 @@ export function createAuthClient({ url, key, storage = globalThis.localStorage, 
     get session() { return session; },
     async restore(hash='') {
       const params = new URLSearchParams(hash.replace(/^#/, ''));
+      if (params.has('error')) {
+        const error = new Error('การเข้าสู่ระบบถูกยกเลิกหรือไม่สำเร็จ');
+        error.code = params.get('error_code') || params.get('error');
+        throw error;
+      }
       const recovery = params.get('type') === 'recovery';
       if (params.has('access_token') && params.has('refresh_token')) {
         remember({access_token:params.get('access_token'),refresh_token:params.get('refresh_token'),expires_in:Number(params.get('expires_in'))||3600});
@@ -59,6 +64,18 @@ export function createAuthClient({ url, key, storage = globalThis.localStorage, 
       if (!configured || !session) return { user:null, recovery:false };
       const user = await authorized('/auth/v1/user');
       session.user = user; remember(session); return {user,recovery};
+    },
+    async googleSignInUrl() {
+      const settings = await request('/auth/v1/settings');
+      if (settings?.external?.google !== true) {
+        const error = new Error('ยังไม่ได้เปิดการเข้าสู่ระบบด้วย Google');
+        error.code = 'provider_disabled'; throw error;
+      }
+      const destination = new URL(base + '/auth/v1/authorize');
+      destination.searchParams.set('provider','google');
+      destination.searchParams.set('redirect_to',redirectUrl);
+      destination.searchParams.set('prompt','select_account');
+      return destination.href;
     },
     async signIn(email,password) {
       const data = await request('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password}});

@@ -86,7 +86,7 @@ function shell(content) {
   const activeKey=page.startsWith('learn-')?'lessons':page;
   const nav=Object.keys(labels).map(key=>`<button class="nav-btn ${activeKey===key?'active':''}" data-nav="${key}" ${activeKey===key?'aria-current="page"':''}><span aria-hidden="true">${icons[key]}</span>${labels[key]}</button>`).join('');
   const mobile=Object.keys(labels).map(key=>`<button class="${activeKey===key?'active':''}" data-nav="${key}" ${activeKey===key?'aria-current="page"':''}><span class="nav-icon" aria-hidden="true">${icons[key]}</span>${labels[key]}</button>`).join('');
-  const name=user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'ผู้เรียน';
+  const name=user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'ผู้เรียน';
   app.innerHTML=`<div class="app"><a class="skip-link" href="#main-content">ข้ามไปเนื้อหา</a>
   <header class="topbar"><button class="brand" data-nav="today"><span class="logo">y.</span><span>English <small>with Yuri</small></span></button>
   <span class="top-note">A little every day. A lot more confidence.</span>
@@ -125,7 +125,7 @@ function bindSkills() {
 function renderToday() {
   const current=lessons.find(l=>l.id===state.currentLesson)||lessons[0];
   const pct=state.completed.includes(current.id)?100:Math.round(state.currentStep/7*100);
-  const name=user?.user_metadata?.display_name || '';
+  const name=user?.user_metadata?.display_name || user?.user_metadata?.full_name || '';
   shell(`<div class="welcome-line"><span>${name?'สวัสดี '+esc(name)+' 👋':'ยินดีต้อนรับสู่พื้นที่เรียนรู้ของคุณ 👋'}</span><span data-sync-status>${syncText()}</span></div>
   <section class="hero"><div class="hero-content"><p class="eyebrow"><span class="badge-dot"></span> SMALL STEPS. REAL CONFIDENCE.</p><h1>ภาษาอังกฤษ<br>เริ่มได้ <em>ในแบบคุณ.</em></h1><p class="hero-copy">จากประโยคแรก ถึงบทสนทนาที่ใช้จริง<br>เรียนด้วยคำอธิบายไทย ฝึกครบ 4 ทักษะ<br>ทีละนิด ในจังหวะที่คุณเลือก</p><div class="actions"><button class="btn primary" data-lesson="${current.id}">${state.currentStep?'เรียนต่อจากจุดเดิม':'เริ่มเรียนวันนี้'} <span>↗</span></button><button class="btn hero-secondary" id="assessment">ลองประเมินพื้นฐาน</button></div><div class="hero-proof"><span>✓ ${lessons.length} บทเรียนพร้อมใช้</span><span>✓ เริ่มจากศูนย์ได้</span><span>✓ เรียนฟรี</span></div></div>
   <div class="hero-art" aria-hidden="true"><div class="art-orbit"></div><div class="hello-card"><span>YOUR FIRST CONVERSATION</span><strong>Hello,<br><em>world.</em></strong><div class="hello-divider"></div><p>โลกของคุณ กว้างขึ้นได้อีกนิด</p></div><div class="floating-word"><b>confidence</b><span>ความมั่นใจ / เริ่มได้ทุกวัน</span></div><div class="floating-sound"><span>▂ ▅ ▃ ▇ ▄ ▅ ▂</span><small>Listen. Speak. Repeat.</small></div><div class="art-spark">✦</div></div></section>
@@ -194,7 +194,7 @@ function renderProgress() {
 function renderAccount() {
   if(authBusy) { shell('<section class="account-shell card" role="status"><p class="eyebrow">YOUR LEARNING ACCOUNT</p><h1>กำลังเชื่อมต่อบัญชี…</h1><p>รอสักครู่ ความก้าวหน้าจะถูกโหลดแยกตามบัญชี</p></section>');return; }
   if(user && !recoveryMode) {
-    const name=user.user_metadata?.display_name || user.email;
+    const name=user.user_metadata?.display_name || user.user_metadata?.full_name || user.email;
     const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp;
     shell(`<header class="page-head"><p class="eyebrow">YOUR OWN LEARNING SPACE</p><h1>สวัสดี ${esc(name)}.</h1><p>${esc(user.email)}</p></header><div class="today-grid"><article class="card side-card"><span class="pill">บัญชีผู้เรียน</span><h2>ทุกก้าว เป็นของคุณ</h2><p data-sync-status>${syncText()}</p><p>เรียนแล้ว ${state.completed.length} จาก ${lessons.length} บท · เรียนค้างที่บท ${state.currentLesson}</p><div class="actions"><button class="btn primary" data-lesson="${state.currentLesson}">เรียนต่อ →</button><button class="btn secondary" id="syncNow">ซิงก์อีกครั้ง</button></div>${isTeacher?'<div class="settings-block"><h3>สำหรับครู</h3><p>ดูรายชื่อผู้เรียนและความก้าวหน้าจากข้อมูลที่ซิงก์แล้ว</p><button class="btn secondary" data-nav="teacher">เปิดหน้าผู้เรียน ↗</button></div>':''}</article><aside class="card side-card"><h2>จัดการบัญชี</h2><p>เมื่อออกจากระบบ เว็บกลับไปใช้ความก้าวหน้าแบบไม่สมัคร ข้อมูลแต่ละบัญชีแยกกัน</p>${hasGuest?'<div class="notice">พบความก้าวหน้าแบบไม่สมัครในเครื่องนี้ นำเข้าเฉพาะเมื่อเป็นข้อมูลของคุณเอง</div><button class="btn secondary" id="importGuest">นำความก้าวหน้าในเครื่องเข้าบัญชีนี้</button>':''}<div class="settings-block"><button class="btn secondary" id="passwordEmail">ส่งลิงก์เปลี่ยนรหัสผ่าน</button><button class="btn danger" id="logout">ออกจากระบบ</button></div><p id="accountFeedback" role="status"></p></aside></div>`);
     document.querySelector('#syncNow').onclick=async e=>{e.target.disabled=true;try{await retryCloud();toast('ซิงก์ความก้าวหน้าแล้ว');}catch{toast('ยังเชื่อมต่อไม่ได้ ข้อมูลในเครื่องยังอยู่');}finally{e.target.disabled=false;updateSyncLabel();}};
@@ -216,6 +216,7 @@ function renderAccount() {
   const signup=accountMode==='signup',reset=accountMode==='reset',recover=recoveryMode;
   shell(`<section class="account-layout"><div class="account-intro"><p class="eyebrow">KEEP YOUR LITTLE WINS</p><h1>พื้นที่เรียนรู้<br>ที่เป็นของคุณ.</h1><p>เก็บความก้าวหน้า กลับมาเรียนต่อ แล้วค่อย ๆ ไปไกลกว่าเดิม</p><div class="account-benefits"><span>✓ ความก้าวหน้าแยกตามบัญชี</span><span>✓ ซิงก์บทเรียนข้ามเครื่อง</span><span>✓ เรียนฟรีในจังหวะของคุณ</span></div></div>
   <article class="card auth-card"><span class="auth-icon">y.</span><h2>${recover?'ตั้งรหัสผ่านใหม่':reset?'ลืมรหัสผ่าน?':signup?'เริ่มต้นบัญชีของคุณ':'ยินดีต้อนรับกลับมา'}</h2><p>${reset?'เราจะส่งลิงก์ให้คุณกลับเข้าบัญชี':recover?'ตั้งรหัสใหม่ แล้วใช้เข้าสู่ระบบครั้งต่อไป':'ทุกก้าวเล็ก ๆ ของคุณ จะกลับมาต่อได้เสมอ'}</p>
+  ${!reset&&!recover?`<button class="btn google-login" type="button" id="googleLogin"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.22c1.88-1.73 2.99-4.28 2.99-7.36Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.41l-3.22-2.51c-.89.6-2.03.95-3.39.95-2.6 0-4.8-1.76-5.58-4.12H3.1v2.59A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.42 13.91A6 6 0 0 1 6.1 12c0-.66.11-1.3.32-1.91V7.5H3.1a10 10 0 0 0 0 9l3.32-2.59Z"/><path fill="#EA4335" d="M12 5.97c1.47 0 2.79.5 3.82 1.49l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.9 5.5l3.32 2.59C7.2 7.73 9.4 5.97 12 5.97Z"/></svg>เข้าสู่ระบบด้วย Google</button><div class="auth-divider"><span>หรือใช้อีเมล</span></div>`:''}
   ${!reset&&!recover?`<div class="segmented auth-tabs"><button data-auth-mode="login" class="${signup?'':'active'}" aria-pressed="${!signup}">เข้าสู่ระบบ</button><button data-auth-mode="signup" class="${signup?'active':''}" aria-pressed="${signup}">สมัครบัญชี</button></div>`:''}
   <form id="authForm">${signup?'<label for="displayName">ชื่อที่อยากให้เรียก</label><input class="text-input" id="displayName" name="displayName" autocomplete="nickname" required minlength="1" maxlength="80">':''}
   ${!recover?'<label for="email">อีเมล</label><input class="text-input" id="email" name="email" type="email" autocomplete="email" required maxlength="254">':''}
@@ -224,6 +225,12 @@ function renderAccount() {
   <p id="authFeedback" role="alert" class="auth-feedback"></p><button class="btn primary" type="submit" id="authSubmit">${recover?'บันทึกรหัสใหม่':reset?'ส่งลิงก์รีเซ็ตรหัสผ่าน':signup?'สมัครบัญชี →':'เข้าสู่ระบบ →'}</button></form>
   ${!recover?`<button class="text-link" data-auth-mode="${reset?'login':'reset'}">${reset?'กลับไปเข้าสู่ระบบ':'ลืมรหัสผ่าน'}</button><button class="text-link" data-nav="today">เรียนแบบไม่สมัครก่อน</button>`:''}</article></section>`);
   document.querySelectorAll('[data-auth-mode]').forEach(b=>b.onclick=()=>{accountMode=b.dataset.authMode;renderAccount();});
+  document.querySelector('#googleLogin')?.addEventListener('click',async e=>{
+    const button=e.currentTarget,feedback=document.querySelector('#authFeedback');
+    button.disabled=true;feedback.textContent='กำลังพาไปเลือกบัญชี Google…';
+    try { location.assign(await auth.googleSignInUrl()); }
+    catch(error) { feedback.textContent=authError(error);button.disabled=false; }
+  });
   document.querySelector('#authForm').onsubmit=async e=>{
     e.preventDefault();const submit=document.querySelector('#authSubmit'),feedback=document.querySelector('#authFeedback');
     const email=document.querySelector('#email')?.value.trim(),password=document.querySelector('#password')?.value;
@@ -242,6 +249,8 @@ function renderAccount() {
   };
 }
 function authError(error) {
+  if(error.code==='provider_disabled')return 'Google ยังไม่เปิดใช้งาน กรุณาใช้อีเมลก่อน';
+  if(error.code==='access_denied')return 'ยกเลิกการเข้าสู่ระบบด้วย Google แล้ว ลองใหม่ได้เมื่อพร้อม';
   if(error.status===429)return 'ขอใช้งานถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
   if(error.code==='email_not_confirmed')return 'โปรดยืนยันอีเมลก่อนเข้าสู่ระบบ';
   if(error.code==='invalid_credentials'||error.status===400)return 'ข้อมูลไม่ถูกต้องหรือยังใช้งานไม่ได้ โปรดตรวจอีเมลและรหัสผ่าน';
@@ -332,7 +341,7 @@ async function initializeAccount(){
      const restored=await auth.restore(hash);recoveryMode=restored.recovery;
      if(restored.user)await adoptUser(restored.user);
    }
- }catch{syncState=user?'error':'local';if(callback)toast('ลิงก์นี้ใช้ไม่ได้หรือเชื่อมต่อไม่สำเร็จ กรุณาขอลิงก์ใหม่');}
+ }catch(error){syncState=user?'error':'local';if(callback)toast(error.code==='access_denied'?authError(error):'ลิงก์นี้ใช้ไม่ได้หรือเชื่อมต่อไม่สำเร็จ กรุณาลองเข้าสู่ระบบใหม่');}
  finally{authBusy=false;render();}
 }
 initializeAccount();

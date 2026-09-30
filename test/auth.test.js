@@ -44,3 +44,40 @@ test('recovery callback validates the user before reporting password-reset mode'
  const restored=await client.restore('#access_token=access&refresh_token=refresh&type=recovery&expires_in=3600');
  assert.equal(restored.user.id,'A');assert.equal(restored.recovery,true);
 });
+
+test('Google entry point checks provider availability and uses the website redirect',async()=>{
+ const calls=[],store=memory();
+ const client=createAuthClient({...opts,storage:store,fetchImpl:async(url,options)=>{calls.push({url,options});return response({external:{google:true}});}});
+ const url=new URL(await client.googleSignInUrl());
+ assert.equal(calls[0].url,opts.url+'/auth/v1/settings');
+ assert.equal(calls[0].options.headers.apikey,opts.key);
+ assert.equal(url.origin,opts.url);
+ assert.equal(url.pathname,'/auth/v1/authorize');
+ assert.equal(url.searchParams.get('provider'),'google');
+ assert.equal(url.searchParams.get('redirect_to'),opts.redirectUrl);
+ assert.equal(url.searchParams.get('prompt'),'select_account');
+ assert.equal(url.searchParams.has('apikey'),false);
+ assert.equal(store.map.size,0);
+});
+test('disabled Google provider is surfaced without creating a session',async()=>{
+ const client=createAuthClient({...opts,storage:memory(),fetchImpl:async()=>response({external:{google:false}})});
+ await assert.rejects(()=>client.googleSignInUrl(),error=>error.code==='provider_disabled');
+ assert.equal(client.session,null);
+});
+test('Google callback validates identity and uses its JWT for cloud progress',async()=>{
+ const calls=[];
+ const client=createAuthClient({...opts,storage:memory(),fetchImpl:async(url,options)=>{
+  calls.push({url,options});return response(url.endsWith('/auth/v1/user')?session.user:[]);
+ }});
+ const restored=await client.restore('#access_token=google-access&refresh_token=google-refresh&expires_in=3600&type=signup');
+ assert.equal(restored.user.id,'A');assert.equal(restored.recovery,false);
+ await client.getProgress('A');
+ assert.equal(calls[0].options.headers.Authorization,'Bearer google-access');
+ assert.equal(calls[1].options.headers.Authorization,'Bearer google-access');
+});
+test('cancelled OAuth callbacks report cancellation without accepting identity',async()=>{
+ let requests=0;
+ const client=createAuthClient({...opts,storage:memory(),fetchImpl:async()=>{requests++;}});
+ await assert.rejects(()=>client.restore('#error=access_denied&error_description=cancelled'),error=>error.code==='access_denied');
+ assert.equal(requests,0);assert.equal(client.session,null);
+});
