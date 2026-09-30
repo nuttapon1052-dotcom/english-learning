@@ -38,3 +38,8 @@ button{color:inherit}a{color:var(--blue)}button{transition:background-color .15s
 .google-login:hover{background:#f8f9fa;border-color:#aeb4bd}.google-login:disabled{opacity:.65}.google-login svg{width:20px;height:20px;flex-shrink:0}
 .auth-divider{display:flex;align-items:center;gap:14px;margin:24px 0 0;font-size:11px;color:var(--muted)}
 .auth-divider:before,.auth-divider:after{content:'';height:1px;background:var(--line);flex:1}
+
+.sync-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-bottom:16px;padding:10px 14px;border:1px solid #d8e8df;border-radius:12px;background:#f0f8f3;color:#2c6442;font-size:11px;line-height:1.7}
+.sync-banner[data-state="pending"],.sync-banner[data-state="syncing"],.sync-banner[data-state="loading"]{border-color:#e5def7;background:#f4f1fc;color:#62518b}
+.sync-banner[data-state="error"]{border-color:#efccac;background:#fff6eb;color:#875226}
+.sync-banner .text-link{font-size:11px}

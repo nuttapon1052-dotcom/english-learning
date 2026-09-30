@@ -20,3 +20,30 @@ test('guest, learner A and learner B have separate local storage keys',()=>{
  assert.notEqual(accountKey(),accountKey('A'));assert.notEqual(accountKey('A'),accountKey('B'));
  assert.equal(normalizeProgress(null).completed.length,0);assert.equal(normalizeProgress([]).completed.length,0);
 });
+
+test('different devices merge awards into consistent activity counts',()=>{
+ const a={...freshProgress(),awards:['listen:1','arrange:1'],xp:2,skill:{ฟัง:10,เขียน:10},updatedAt:10};
+ const b={...freshProgress(),awards:['listen:2','write:2'],xp:2,skill:{ฟัง:10,เขียน:10},updatedAt:20};
+ const p=mergeProgress(a,b);assert.equal(p.xp,4);assert.equal(p.skill.ฟัง,20);assert.equal(p.skill.เขียน,20);
+});
+test('a reset epoch prevents stale devices resurrecting old progress',()=>{
+ const old={...freshProgress(),completed:[1,2],updatedAt:9999};
+ const reset={...freshProgress(),resetAt:100,updatedAt:100};
+ assert.deepEqual(mergeProgress(old,reset).completed,[]);
+ assert.equal(mergeProgress(reset,old).resetAt,100);
+});
+test('lesson drafts merge independently and imported checked flags are validated',()=>{
+ const a={...freshProgress(),lessonDrafts:{2:{arranged:['He','is','ready.'],fillValue:'is',arrangeChecked:true,fillChecked:true,writing:'I am happy.',updatedAt:20}}};
+ const b={...freshProgress(),lessonDrafts:{3:{writing:'I work in an office.',updatedAt:30},2:{writing:'old',arranged:['<img>'],fillValue:'wrong',arrangeChecked:true,fillChecked:true,updatedAt:10}}};
+ const p=mergeProgress(a,b);
+ assert.equal(p.lessonDrafts[2].writing,'I am happy.');assert.equal(p.lessonDrafts[2].arrangeChecked,true);
+ assert.equal(p.lessonDrafts[3].writing,'I work in an office.');
+ const bad=normalizeProgress(b);assert.equal(bad.lessonDrafts[2].arrangeChecked,false);assert.equal(bad.lessonDrafts[2].fillChecked,false);assert.deepEqual(bad.lessonDrafts[2].arranged,[]);
+});
+test('mistake review merges corrections without reviving cleared errors',()=>{
+ const a={...freshProgress(),mistakeEvents:{'2:ฟัง':{wrongAt:10,clearedAt:0}}};
+ const b={...freshProgress(),mistakeEvents:{'2:ฟัง':{wrongAt:10,clearedAt:20},'3:อ่าน':{wrongAt:25,clearedAt:0}}};
+ const p=mergeProgress(a,b);assert.deepEqual(p.mistakes,[{lesson:3,type:'อ่าน'}]);
+ const newError={...freshProgress(),mistakeEvents:{'2:ฟัง':{wrongAt:30,clearedAt:0}}};
+ assert.ok(mergeProgress(p,newError).mistakes.some(m=>m.lesson===2));
+});

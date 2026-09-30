@@ -17,10 +17,10 @@ export function createAuthClient({ url, key, storage = globalThis.localStorage, 
     try { session ? storage?.setItem(sessionKey, JSON.stringify(session)) : storage?.removeItem(sessionKey); } catch { /* session continues in memory */ }
     return session;
   }
-  async function request(path, { method='GET', body, token, headers={} } = {}) {
+  async function request(path, { method='GET', body, token, headers={}, keepalive=false } = {}) {
     if (!configured) throw new Error('ยังไม่ได้เปิดระบบบัญชีผู้ใช้ กรุณาเรียนแบบไม่สมัครก่อน');
     const response = await fetchImpl(base + path, {
-      method, headers: { apikey: key, 'Content-Type':'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...headers },
+      method, keepalive, headers: { apikey: key, 'Content-Type':'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...headers },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
       signal: AbortSignal.timeout(15000)
     });
@@ -101,11 +101,26 @@ export function createAuthClient({ url, key, storage = globalThis.localStorage, 
       const rows = await authorized('/rest/v1/learner_progress?user_id=eq.' + encodeURIComponent(userId) + '&select=state,updated_at');
       return rows?.[0] || null;
     },
-    async putProgress(userId,state) {
-      await authorized('/rest/v1/learner_progress?on_conflict=user_id',{
-        method:'POST',body:{user_id:userId,state},
-        headers:{Prefer:'resolution=merge-duplicates,return=minimal'}
-      });
+    async compareAndSetProgress(userId,state,version=null,{keepalive=false}={}) {
+      const query='user_id=eq.'+encodeURIComponent(userId)+(version!==null?'&updated_at=eq.'+encodeURIComponent(version):'');
+      const path='/rest/v1/learner_progress'+(version!==null?'?'+query:'');
+      const options={
+        method:version!==null?'PATCH':'POST',body:version!==null?{state}:{user_id:userId,state},
+        headers:{Prefer:'return=representation'},keepalive
+      };
+      try {
+        let rows;
+        if(keepalive){
+          if(!session || session.expires_at<=Date.now()/1000+15)throw new Error('Session needs refreshing before syncing');
+          if(new TextEncoder().encode(JSON.stringify(options.body)).length>60000)throw new Error('Progress requires a normal sync');
+          rows=await request(path,{...options,token:session.access_token});
+        }else rows=await authorized(path,options);
+        return Array.isArray(rows)?rows[0]||null:null;
+      }catch(error){
+        // A racing first insert is retried as a versioned update, never an upsert.
+        if(version===null && error.status===409 && error.code==='23505')return null;
+        throw error;
+      }
     },
     async isTeacher() { return Boolean(await authorized('/rest/v1/rpc/is_teacher',{method:'POST',body:{}})); },
     async getLearners() {
