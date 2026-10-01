@@ -54,3 +54,16 @@ test('explicit guest and backup imports merge data without inheriting another na
  const p=importProgress(account,guest);
  assert.deepEqual(p.completed,[2,5]);assert.equal(p.resetAt,100);
 });
+
+test('foundation vocabulary is validated, merged and imported separately from lessons',()=>{
+ const a=normalizeProgress({basicWordsReviewed:['days:monday','days:monday','fruit:apple','fake:id','<img>'],updatedAt:10});
+ assert.deepEqual(a.basicWordsReviewed,['days:monday','fruit:apple']);
+ assert.deepEqual(a.completed,[]);assert.deepEqual(a.learnedWords,[]);assert.equal(a.xp,0);
+ const b={...freshProgress(),basicWordsReviewed:['months:january'],updatedAt:20};
+ const merged=mergeProgress(a,b);
+ assert.deepEqual(merged.basicWordsReviewed,['days:monday','fruit:apple','months:january']);
+ assert.deepEqual(mergeProgress(merged,merged),merged);
+ assert.deepEqual(importProgress(b,a).basicWordsReviewed,merged.basicWordsReviewed);
+ assert.deepEqual(mergeProgress(merged,{...freshProgress(),resetAt:30,updatedAt:30}).basicWordsReviewed,[]);
+ assert.deepEqual(normalizeProgress({completed:[1]}).basicWordsReviewed,[]);
+});

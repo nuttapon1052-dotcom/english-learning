@@ -1,5 +1,7 @@
 import './styles.css';
 import { icon, lessonIcon } from './icons.js';
+import { createVocabularyLibrary } from './vocabulary-library.js';
+import { basicVocabulary } from './basic-vocabulary.js';
 import { lessons, roadmap } from './lessons.js';
 import { freshProgress, normalizeProgress, mergeProgress, importProgress, accountKey, todayKey } from './progress.js';
 import { createAuthClient } from './auth.js';
@@ -8,7 +10,7 @@ import { loadAuthConfig } from './config.js';
 
 let user = null, auth = null, isTeacher = false, cloudReady = false, authBusy = true;
 let syncState = 'local', syncTimer, syncing = null, syncAgain = false, identityVersion = 0, cloudRow = null;
-let accountMode = 'login', recoveryMode = false, courseFilter = 'all', courseSearch = '', lessonStatus = 'all';
+let accountMode = 'login', recoveryMode = false, courseFilter = 'all', courseSearch = '', lessonStatus = 'all', vocabSource = 'basic';
 function loadLocal(id) { try { return normalizeProgress(JSON.parse(localStorage.getItem(accountKey(id)) || '{}')); } catch { return freshProgress(); } }
 let state = loadLocal();
 let page = location.hash.slice(1) || 'today';
@@ -21,6 +23,13 @@ const labels = { today:'วันนี้', lessons:'บทเรียน', pr
 const courseIcons = ['sprout','cup','compass','chat','bag','spark','key','route'].map(icon);
 const courseRanges = roadmap.map((_,i)=>[i*4+1,Math.min(i*4+4,lessons.length)]);
 const knownWords = new Set(lessons.flatMap(l=>l.words.map(w=>w[0]))).size;
+const vocabularyLibrary=createVocabularyLibrary({
+ getState:()=>state,icon,esc,speak,
+ shell:content=>{shell(vocabTabs()+content);bindVocabTabs();},
+ setThaiSound:value=>{state.showThaiSound=value;save();},
+ review:id=>{if(!basicVocabulary.some(w=>w.id===id)||state.basicWordsReviewed.includes(id))return;state.basicWordsReviewed.push(id);save();}
+});
+
 
 function writeLocal() {
   try { localStorage.setItem(accountKey(user?.id), JSON.stringify(state)); }
@@ -90,7 +99,7 @@ function flushProgressInBackground() {
 }
 async function adoptUser(nextUser) {
   identityVersion++; clearTimeout(syncTimer); cloudReady=false; isTeacher=false; cloudRow=null;
-  user=nextUser; state=loadLocal(user?.id); lessonSession=sessionForLesson(state.currentLesson); syncState=user?'loading':'local';
+  user=nextUser; vocabularyLibrary.reset(); state=loadLocal(user?.id); lessonSession=sessionForLesson(state.currentLesson); syncState=user?'loading':'local';
   if(!user)return;
   const version=identityVersion;
   try {
@@ -128,7 +137,7 @@ function shell(content) {
   bindCommon();
 }
 function bindCommon() {
-  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));
+  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(b.dataset.vocabEntry==='basic')vocabSource='basic';navigate(b.dataset.nav);});
   document.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>startLesson(+b.dataset.lesson));
   document.querySelectorAll('[data-speak]').forEach(b=>b.onclick=()=>speak(b.dataset.speak));
 }
@@ -158,10 +167,11 @@ function renderToday() {
   shell(`<div class="welcome-line"><span>${name?'สวัสดี '+esc(name)+' 👋':'ยินดีต้อนรับสู่พื้นที่เรียนรู้ของคุณ 👋'}</span><span data-sync-status>${syncText()}</span></div>
   <section class="hero"><div class="hero-content"><p class="eyebrow"><span class="badge-dot"></span> YOUR EVERYDAY ENGLISH STUDIO</p><h1>ภาษาอังกฤษ<br>ทีละนิด <em>ไปได้อีกไกล.</em></h1><p class="hero-copy">จากประโยคแรก ถึงบทสนทนาที่ใช้จริง<br>เรียนด้วยคำอธิบายไทย ฝึกครบ 4 ทักษะ<br>ทีละนิด ในจังหวะที่คุณเลือก</p><div class="actions"><button class="btn primary" data-lesson="${current.id}">${state.currentStep?'เรียนต่อจากจุดเดิม':'เริ่มเรียนวันนี้'} <span>↗</span></button><button class="btn hero-secondary" id="assessment">ลองประเมินพื้นฐาน</button></div><div class="hero-proof"><span>✓ ${lessons.length} บทเรียนพร้อมใช้</span><span>✓ เริ่มจากศูนย์ได้</span><span>✓ เรียนฟรี</span></div></div>
   <div class="hero-art conversation-art" aria-hidden="true"><div class="conversation-label"><span class="live-dot"></span> A LITTLE PRACTICE, EVERY DAY</div><div class="conversation-bubble bubble-a"><span class="bubble-avatar">${icon('spark')}</span><div><small>LET’S START HERE</small><strong>Hello, new possibilities.</strong><p>เริ่มบทสนทนา เปิดโอกาสใหม่</p></div></div><div class="conversation-bubble bubble-b"><div><small>YOUR TURN</small><strong>I can do this.</strong><p>ฉันทำได้ ทีละนิดก็ได้</p></div><span class="bubble-avatar">${icon('mic')}</span></div><div class="practice-ticket"><span class="ticket-icon">${icon('headphones')}</span><div><strong>Listen. Try. Grow.</strong><span>วันละ 15 นาที เริ่มตรงนี้</span></div><div class="sound-wave"><i></i><i></i><i></i><i></i><i></i></div></div><div class="art-caption">YOUR NEXT CHAPTER STARTS WITH A WORD.</div></div></section>
-  <div class="dashboard-stats"><article><span class="stat-symbol">${icon('book')}</span><div><strong>${state.completed.length}<small> / ${lessons.length}</small></strong><p>บทเรียนที่จบแล้ว</p></div></article><article><span class="stat-symbol">${icon('cards')}</span><div><strong>${state.learnedWords.length}</strong><p>คำศัพท์ในคลังของคุณ</p></div></article><article><span class="stat-symbol">${icon('calendar')}</span><div><strong>${state.activity.length}</strong><p>วันที่มีกิจกรรมการเรียน</p></div></article></div>
+  <div class="dashboard-stats"><article><span class="stat-symbol">${icon('book')}</span><div><strong>${state.completed.length}<small> / ${lessons.length}</small></strong><p>บทเรียนที่จบแล้ว</p></div></article><article><span class="stat-symbol">${icon('cards')}</span><div><strong>${state.learnedWords.length}</strong><p>คำศัพท์จากบทเรียน</p></div></article><article><span class="stat-symbol">${icon('calendar')}</span><div><strong>${state.activity.length}</strong><p>วันที่มีกิจกรรมการเรียน</p></div></article></div>
   <div class="section-title"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>ก้าวถัดไปของคุณ</h2></div><button class="text-link" data-nav="lessons">ดูทุกบทเรียน ↗</button></div>
   <section class="today-grid"><article class="card lesson-feature"><div class="big-icon">${lessonIcon(current.id)}</div><div><div class="feature-meta"><span class="pill">บทที่ ${current.id}</span><span>${current.minutes} นาที</span></div><h3>${current.title}</h3><p>${current.subtitle}</p></div><div class="feature-bottom"><div class="feature-progress"><div class="bar"><i style="width:${pct}%"></i></div><span>${pct}% ของบทนี้</span></div><button class="btn primary" data-lesson="${current.id}">${pct===100?'ทบทวนอีกครั้ง':pct?'เรียนต่อ':'เริ่มบทเรียน'} →</button></div></article>
   <article class="card time-card"><span class="mini-label">MAKE ROOM FOR YOURSELF</span><h3>วันนี้ให้เวลากับตัวเองกี่นาที?</h3><p>ตั้งเป้าหมายที่พอดี ไม่ต้องเรียนรวดเดียว</p><div class="segmented">${[15,30,60].map(n=>`<button data-time="${n}" aria-pressed="${state.minutes===n}" class="${state.minutes===n?'active':''}">${n}<small>นาที</small></button>`).join('')}</div><p class="goal-note">✦ บทส่วนใหญ่ใช้เวลา 12–15 นาที</p></article></section>
+  <section class="foundation-banner"><span class="foundation-banner-icon">${icon('cards')}</span><div><p class="eyebrow">EVERYDAY WORDS</p><h2>เริ่มจากคำที่เจอทุกวัน</h2><p>วัน เดือน ตัวเลข ผลไม้ สัตว์ และสิ่งของ · ${basicVocabulary.length} คำ</p></div><button class="btn secondary" data-nav="vocab" data-vocab-entry="basic">เปิดคลังศัพท์พื้นฐาน ${icon('arrow')}</button></section>
   <div class="section-title"><div><p class="eyebrow">FOUR WAYS TO GROW</p><h2>ฝึกให้ครบทุกทักษะ</h2></div><span class="section-note">เปอร์เซ็นต์แสดงกิจกรรมที่ฝึก ไม่ใช่ระดับภาษา</span></div><div class="skill-row">${skillCards()}</div>
   <div class="section-title"><div><p class="eyebrow">YOUR LEARNING JOURNEY</p><h2>เลือกเส้นทางที่ใช่</h2><p>${roadmap.length} หมวด จากพื้นฐานสู่สถานการณ์จริง</p></div></div><div class="roadmap">${roadmap.map((r,i)=>courseCard(r,i)).join('')}</div>
   ${!user?`<section class="join-banner"><div><span class="eyebrow">KEEP YOUR LITTLE WINS</span><h2>ทุกก้าวของคุณ มีที่เก็บเสมอ</h2><p>เข้าสู่ระบบด้วย Google เพื่อเก็บบทที่เรียนและกลับมาเรียนต่อข้ามเครื่อง</p></div><button class="btn primary" data-nav="account">เข้าสู่ระบบด้วย Google</button></section>`:''}`);
@@ -228,9 +238,19 @@ function renderPractice() {
   document.querySelector('#speakPractice').onclick=()=>{state.currentStep=4;state.cursorUpdatedAt=Date.now();save();startLesson(state.currentLesson);};
   bindSkills();
 }
-function renderVocab() {
+function vocabTabs(){
+ return `<nav class="vocab-source-tabs" aria-label="ประเภทคลังคำศัพท์"><button data-vocab-source="basic" ${vocabSource==='basic'?'aria-current="page"':''}>${icon('sprout')} ศัพท์พื้นฐาน <span>${basicVocabulary.length}</span></button><button data-vocab-source="lessons" ${vocabSource==='lessons'?'aria-current="page"':''}>${icon('book')} จากบทเรียน <span>${state.learnedWords.length}</span></button></nav>`;
+}
+function bindVocabTabs(){
+ document.querySelectorAll('[data-vocab-source]').forEach(b=>b.onclick=()=>{vocabSource=b.dataset.vocabSource;renderVocab();});
+}
+function renderVocab(){
+ if(vocabSource==='basic')return vocabularyLibrary.render();
+ renderLessonVocab();bindVocabTabs();
+}
+function renderLessonVocab() {
   const words=state.learnedWords;
-  shell(`<header class="page-head"><p class="eyebrow">WORDS OPEN WORLDS</p><h1>คลังคำเล็ก ๆ ของคุณ.</h1><p>${words.length} คำจากบทเรียนที่ทำจบ · กลับมาฟังและทบทวนได้เสมอ</p></header>
+  shell(vocabTabs()+`<header class="page-head"><p class="eyebrow">WORDS OPEN WORLDS</p><h1>คลังคำเล็ก ๆ ของคุณ.</h1><p>${words.length} คำจากบทเรียนที่ทำจบ · กลับมาฟังและทบทวนได้เสมอ</p></header>
   <div class="vocab-page-grid"><section class="card vocab-table">${words.length?words.map(w=>`<div class="vocab-item"><div><strong class="word-en">${esc(w[0])}</strong><span class="word-th">${esc(w[1])}</span></div>${state.showThaiSound?`<span class="thai-sound">${esc(w[2])}</span>`:'<span></span>'}<button class="sound-btn" data-speak="${esc(w[0])}" aria-label="ฟังคำว่า ${esc(w[0])}">${icon('volume')}</button></div>`).join(''):`<div class="empty"><div class="emoji">${icon('book')}</div><h3>คำแรกของคุณ รออยู่ในบทเรียน</h3><p>จบบทแรก แล้วคำศัพท์จะมาอยู่ตรงนี้</p><button class="btn primary" data-lesson="1">เริ่มบทแรก ↗</button></div>`}</section>
   <aside class="card side-card"><span class="eyebrow">LISTEN FIRST</span><h3>ฟังเสียงจริง ก่อนจำคำอ่าน</h3><p>คำอ่านไทยเป็นเพียงตัวช่วยคร่าว ๆ เสียงภาษาอังกฤษจากปุ่มฟังคือต้นแบบหลัก</p><label class="toggle"><input type="checkbox" id="thaiToggle" ${state.showThaiSound?'checked':''}> แสดงคำอ่านไทย</label><div class="tip-box">ลองฟัง → พูดตาม → ใช้ในประโยคสั้น ๆ</div></aside></div>`);
   document.querySelector('#thaiToggle').onchange=e=>{state.showThaiSound=e.target.checked;save();renderVocab();};
@@ -238,7 +258,7 @@ function renderVocab() {
 function renderProgress() {
   const done=state.completed.length;
   shell(`<header class="page-head"><p class="eyebrow">EVERY LITTLE WIN COUNTS</p><h1>คุณมาไกลขึ้นอีกนิด.</h1><p data-sync-status>${syncText()}</p></header>
-  <div class="stats-grid"><article class="card stat"><span class="mini-label">LESSONS COMPLETED</span><div class="num">${done}<small> / ${lessons.length}</small></div><p>บทเรียนที่จบแล้ว</p><div class="bar"><i style="width:${done/lessons.length*100}%"></i></div></article><article class="card stat"><span class="mini-label">YOUR WORD BANK</span><div class="num">${state.learnedWords.length}</div><p>คำศัพท์ที่พบแล้ว</p></article><article class="card stat"><span class="mini-label">ACTIVE DAYS</span><div class="num">${state.activity.length}</div><p>วันที่มีกิจกรรมการเรียน</p></article></div>
+  <div class="stats-grid"><article class="card stat"><span class="mini-label">LESSONS COMPLETED</span><div class="num">${done}<small> / ${lessons.length}</small></div><p>บทเรียนที่จบแล้ว</p><div class="bar"><i style="width:${done/lessons.length*100}%"></i></div></article><article class="card stat"><span class="mini-label">YOUR WORD BANK</span><div class="num">${state.learnedWords.length}</div><p>คำศัพท์จากบทเรียน</p></article><article class="card stat"><span class="mini-label">ACTIVE DAYS</span><div class="num">${state.activity.length}</div><p>วันที่มีกิจกรรมการเรียน</p></article></div>
   <div class="today-grid"><section class="card side-card"><h2>เส้นทางที่ผ่านมาของคุณ</h2><div class="journey-list">${roadmap.map((r,i)=>{const[a,b]=courseRanges[i],count=state.completed.filter(id=>id>=a&&id<=b).length;return `<div><span>${courseIcons[i]}</span><div><strong>${r[1]}</strong><div class="bar"><i style="width:${count/4*100}%"></i></div></div><b>${count}/4</b></div>`;}).join('')}</div></section>
   <aside class="card side-card"><span class="eyebrow">YOUR DATA, YOUR CHOICE</span><h2>ข้อมูลของฉัน</h2><p>${user?'ข้อมูลแยกตามบัญชี และจะซิงก์เมื่อเชื่อมต่อได้':'ขณะนี้บันทึกเฉพาะในเครื่องนี้ ส่งออกเพื่อสำรอง หรือดูระบบบัญชีเพื่อซิงก์เมื่อเปิดใช้งาน'}</p><button class="btn secondary" data-nav="account">บัญชีและการซิงก์ ↗</button><div class="settings-block"><button class="btn secondary" id="export">ส่งออกข้อมูล</button><label class="btn secondary" for="import">นำเข้าข้อมูล</label><input hidden type="file" id="import" accept="application/json"><button class="btn danger" id="reset">เริ่มความก้าวหน้าใหม่</button></div></aside></div>
   <div class="section-title"><div><h2>บันทึกการฝึกของคุณ</h2><p>ตัวนับกิจกรรม ไม่ใช่คะแนนรับรองความสามารถทางภาษา</p></div></div><div class="skill-row">${skillCards()}</div>`);
@@ -249,7 +269,7 @@ function renderAccount() {
   if(authBusy) { shell('<section class="account-shell card" role="status"><p class="eyebrow">YOUR LEARNING ACCOUNT</p><h1>กำลังเชื่อมต่อบัญชี…</h1><p>รอสักครู่ ความก้าวหน้าจะถูกโหลดแยกตามบัญชี</p></section>');return; }
   if(user && !recoveryMode) {
     const name=user.user_metadata?.display_name || user.user_metadata?.full_name || user.email;
-    const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp||guest.activity.length||Object.keys(guest.lessonDrafts).length||guest.assessment!==null;
+    const guest=loadLocal(),hasGuest=guest.completed.length||guest.currentStep||guest.xp||guest.activity.length||guest.basicWordsReviewed.length||Object.keys(guest.lessonDrafts).length||guest.assessment!==null;
     shell(`<header class="page-head"><p class="eyebrow">YOUR OWN LEARNING SPACE</p><h1>สวัสดี ${esc(name)}.</h1><p>${esc(user.email)}</p></header><div class="today-grid"><article class="card side-card"><span class="pill">บัญชีผู้เรียน</span><h2>ทุกก้าว เป็นของคุณ</h2><p data-sync-status>${syncText()}</p><p>เรียนแล้ว ${state.completed.length} จาก ${lessons.length} บท · เรียนค้างที่บท ${state.currentLesson}</p><div class="actions"><button class="btn primary" data-lesson="${state.currentLesson}">เรียนต่อ →</button><button class="btn secondary" id="syncNow">ซิงก์อีกครั้ง</button></div>${isTeacher?'<div class="settings-block"><h3>สำหรับครู</h3><p>ดูรายชื่อผู้เรียนและความก้าวหน้าจากข้อมูลที่ซิงก์แล้ว</p><button class="btn secondary" data-nav="teacher">เปิดหน้าผู้เรียน ↗</button></div>':''}</article><aside class="card side-card"><h2>จัดการบัญชี</h2><p>เมื่อออกจากระบบ เว็บกลับไปใช้ความก้าวหน้าแบบไม่สมัคร ข้อมูลแต่ละบัญชีแยกกัน</p>${hasGuest?'<div class="notice">พบความก้าวหน้าแบบไม่สมัครในเครื่องนี้ นำเข้าเฉพาะเมื่อเป็นข้อมูลของคุณเอง</div><button class="btn secondary" id="importGuest">นำความก้าวหน้าในเครื่องเข้าบัญชีนี้</button>':''}<div class="settings-block"><button class="btn secondary" id="passwordEmail">ส่งลิงก์เปลี่ยนรหัสผ่าน</button><button class="btn danger" id="logout">ออกจากระบบ</button></div><p id="accountFeedback" role="status"></p></aside></div>`);
     document.querySelector('#syncNow').onclick=async e=>{e.target.disabled=true;try{await retryCloud();toast('ซิงก์ความก้าวหน้าแล้ว');}catch{toast('ยังเชื่อมต่อไม่ได้ ข้อมูลในเครื่องยังอยู่');}finally{e.target.disabled=false;updateSyncLabel();}};
     document.querySelector('#passwordEmail').onclick=async e=>{e.target.disabled=true;try{await auth.recover(user.email);document.querySelector('#accountFeedback').textContent='ส่งคำขอแล้ว โปรดตรวจอีเมลและกล่องสแปม';}catch(err){document.querySelector('#accountFeedback').textContent=authError(err);}finally{e.target.disabled=false;}};

@@ -1,5 +1,9 @@
 // Original 24 × 24 outline icons. Decorative SVGs inherit the control's accessible label.
 const paths = {
+ "fruit": '<path d="M12 7c-5-4-10 0-9 6 1 6 5 9 9 7 4 2 8-1 9-7 1-6-4-10-9-6Z"/><path d="M12 7c0-4 2-5 5-5 0 3-2 5-5 5Zm0 0L9 3"/>',
+ "paw": '<ellipse cx="6" cy="8" rx="2" ry="3"/><ellipse cx="11" cy="5" rx="2" ry="3"/><ellipse cx="17" cy="7" rx="2" ry="3"/><path d="M6 17c0-3 3-6 6-6s6 3 6 6c0 4-4 2-6 2s-6 2-6-2Z"/><ellipse cx="21" cy="12" rx="1.5" ry="2.5"/>',
+ "numbers": '<path d="m5 5 2-2v8M4 11h6m4-6c0-3 6-3 6 0 0 2-6 4-6 6h6M4 17h5m-5 4h5m7-7v8m-4-4h8"/>',
+ "objects": '<rect x="3" y="12" width="8" height="9" rx="1"/><path d="M7 12V6a3 3 0 0 1 6 0v1m2 4h6v10h-6Zm0 4h6M5 16h4"/>',
   "home": "<path d=\"m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z\"/>",
   "book": "<path d=\"M12 5v16M3 4c4-1 6 0 9 2 3-2 5-3 9-2v15c-4-1-6 0-9 2-3-2-5-3-9-2Z\"/>",
   "target": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/>",
