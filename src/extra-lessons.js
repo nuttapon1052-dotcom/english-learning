@@ -1260,7 +1260,7 @@ export const extraLessons = [
   {
     "id": 24,
     "icon": "🌟",
-    "title": "ภารกิจสื่อสารรอบสุดท้าย",
+    "title": "ภารกิจสื่อสารในชีวิตจริง",
     "subtitle": "Put it all together.",
     "goal": "ใช้ภาษาอังกฤษในร้านค้า การเดินทาง และนัดหมายร่วมกันได้",
     "words": [

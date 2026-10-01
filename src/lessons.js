@@ -1,3 +1,5 @@
+import { moreLessons } from './more-lessons.js';
+import { lessonNotes } from './lesson-notes.js';
 import { extraLessons } from './extra-lessons.js';
 const writingExamples = {
   "1": "My name is Mali.",
@@ -81,7 +83,8 @@ export const lessons = [
     "บทสนทนาจริงนำโครงสร้างเดิมมารวมกัน: <b>คำถาม → คำตอบ → เพิ่มเหตุผลหรือทางเลือก</b> ไม่ต้องพูดยาว แค่ชัดเจนและสุภาพก็สื่อสารได้",
     {"listen":"Are you free today?","choices":["วันนี้คุณว่างไหม","วันนี้คุณทำงานไหม","วันนี้คุณไปไหน"],"answer":0,"arrange":["eat","Can we","together?"],"arranged":"Can we eat together?","fill":["I am busy, "," I am free later."],"blank":"but","read":"A: Are you free today? B: I work until five, but I am free later. A: Can we eat together? B: Sure!","question":"ทั้งคู่จะทำอะไร?","readChoices":["ไปทำงาน","ซื้อของ","กินข้าวด้วยกัน"],"readAnswer":2,"write":"Today, I","accepts":["today","i am","i can","i want"]}),
   ...extraLessons,
-].map(l=>({...l,practice:{...l.practice,writingExample:writingExamples[l.id]}}));
+  ...moreLessons,
+].map(l=>({...l,notes:lessonNotes[l.id],practice:{...l.practice,writingExample:writingExamples[l.id] || l.practice.writingExample}}));
 
 export const roadmap = [
   [
@@ -119,5 +122,7 @@ export const roadmap = [
     "สื่อสารอย่างมั่นใจ",
     "อีเมล ประชุม โทรศัพท์ และภารกิจรวม",
     "ready"
-  ]
+  ],
+  ["บท 25–28","เติมฐานให้แข็งแรง","ความเป็นเจ้าของ สถานที่ สิ่งที่กำลังทำ และจำนวน","ready"],
+  ["บท 29–32","เล่าได้ละเอียดขึ้น","ความถี่ กฎ ประสบการณ์ และเงื่อนไขอนาคต","ready"]
 ];
