@@ -1,4 +1,6 @@
 import { lessons } from './lessons.js';
+import { basicVocabulary } from './basic-vocabulary.js';
+const basicIds = new Set(basicVocabulary.map(w=>w.id));
 
 export const STORAGE_KEY = 'english-with-yuri-v1';
 export const skillNames = ['ฟัง', 'พูด', 'อ่าน', 'เขียน'];
@@ -9,7 +11,7 @@ const integer = (value, min, max, fallback = min) => Number.isFinite(Number(valu
 
 export function freshProgress() {
   return { completed: [], currentLesson: 1, currentStep: 0, minutes: 15, xp: 0,
-    mistakes: [], learnedWords: [], skill: Object.fromEntries(skillNames.map(k => [k, 0])),
+    mistakes: [], learnedWords: [], basicWordsReviewed: [], skill: Object.fromEntries(skillNames.map(k => [k, 0])),
     showThaiSound: false, assessment: null, awards: [], activity: [],
     updatedAt: 0, cursorUpdatedAt: 0, resetAt: 0, lessonDrafts: {}, mistakeEvents: {} };
 }
@@ -42,6 +44,7 @@ export function normalizeProgress(input) {
   const known = new Map(lessons.flatMap(l=>l.words).map(w=>[w[0],w]));
   for (const w of Array.isArray(input.learnedWords) ? input.learnedWords : []) if (Array.isArray(w) && known.has(w[0])) words.set(w[0], known.get(w[0]));
   base.learnedWords = [...words.values()];
+  base.basicWordsReviewed = [...new Set((Array.isArray(input.basicWordsReviewed)?input.basicWordsReviewed:[]).filter(id=>basicIds.has(id)))].sort();
   base.awards = [...new Set((Array.isArray(input.awards) ? input.awards : []).filter(x=>typeof x==='string' && /^(listen|read|arrange|fill|write|speak):[0-9]{1,2}$/.test(x) && ids.has(Number(x.split(':')[1]))))];
   base.activity = [...new Set((Array.isArray(input.activity) ? input.activity : []).filter(x=>typeof x==='string' && /^\d{4}-\d{2}-\d{2}$/.test(x)))].sort().slice(-365);
   base.xp = Math.max(base.xp,base.awards.length);
@@ -89,6 +92,7 @@ export function mergeProgress(local, remote) {
     cursorUpdatedAt: cursor.cursorUpdatedAt, updatedAt: Math.max(a.updatedAt,b.updatedAt),
     completed: [...a.completed,...b.completed],
     learnedWords: [...a.learnedWords,...b.learnedWords],
+    basicWordsReviewed: [...a.basicWordsReviewed,...b.basicWordsReviewed],
     awards: [...a.awards,...b.awards], activity: [...a.activity,...b.activity],
     xp: Math.max(a.xp,b.xp),
     skill: Object.fromEntries(skillNames.map(k=>[k,Math.max(a.skill[k],b.skill[k])]))
