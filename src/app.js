@@ -13,7 +13,7 @@ function loadLocal(id) { try { return normalizeProgress(JSON.parse(localStorage.
 let state = loadLocal();
 let page = location.hash.slice(1) || 'today';
 if(page.includes('access_token=') || page.includes('error=')) page = 'account';
-let lessonSession = { selected: {}, arranged: [], showTranscript: false, recording: false, recognitionText: '', audioUrl: null };
+let lessonSession = sessionForLesson(state.currentLesson);
 const esc = value => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const app = document.querySelector('#app');
 const icons = { today:icon('home'), lessons:icon('book'), practice:icon('target'), vocab:icon('cards'), progress:icon('chart') };
@@ -90,7 +90,7 @@ function flushProgressInBackground() {
 }
 async function adoptUser(nextUser) {
   identityVersion++; clearTimeout(syncTimer); cloudReady=false; isTeacher=false; cloudRow=null;
-  user=nextUser; lessonSession={selected:{},arranged:[],showTranscript:false,recording:false,recognitionText:'',audioUrl:null}; state=loadLocal(user?.id); syncState=user?'loading':'local';
+  user=nextUser; state=loadLocal(user?.id); lessonSession=sessionForLesson(state.currentLesson); syncState=user?'loading':'local';
   if(!user)return;
   const version=identityVersion;
   try {

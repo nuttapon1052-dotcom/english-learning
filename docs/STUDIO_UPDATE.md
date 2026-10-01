@@ -29,4 +29,4 @@ The lesson workspace exposes all seven steps with an accessible navigation landm
 
 Node tests check all 32 answer keys against independent reviewed meanings, complete vocabulary/examples and word banks, the full am/is/are coverage and coaching fields. Playwright visits and completes every lesson and reloads saved progress. Additional UI coverage checks 320, 768 and 1440px, filters, step navigation, pronunciation and draft persistence. Existing login/Google and cloud merge/retry/account-isolation cases remain part of the suite.
 
-Cloud tests use a simulated REST service; they do not claim to be a live two-device Google login test. No auth credentials, database policies or sync algorithms are changed.
+Cloud tests use a simulated REST service; they do not claim to be a live two-device Google login test. Fixed initial hydration of locally saved drafts: guest reloads and cached account sessions now restore the lesson answers immediately. No auth credentials, database policies or cloud merge algorithms are changed.
