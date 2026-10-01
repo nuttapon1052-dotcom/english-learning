@@ -18,6 +18,7 @@ for(const l of lessons){
   await expect(page.locator('.word-row')).toHaveCount(l.words.length);
   if(l.id===2)await expect(page.locator('.word-en').getByText('is',{exact:true})).toBeVisible();
   await page.locator('#next').click();await expect(page.locator('.example')).toHaveCount(l.examples.length);
+  await expect(page.locator('.coach-note')).toContainText(l.notes.why);
   await page.locator('#next').click();
   await page.locator('[data-listen-choice="'+l.practice.answer+'"]').click();
   await expect(page.locator('.feedback')).toContainText('ถูกต้อง');
@@ -34,6 +35,6 @@ for(const l of lessons){
   await page.locator('#next').click();
   await expect(page.getByRole('heading',{name:'เก่งมาก! วันนี้คุณทำได้อีกหนึ่งก้าว'})).toBeVisible();
   await page.locator('.review-score [data-nav="progress"]').click();await page.reload();
-  await expect(page.locator('.stats-grid .stat').first()).toContainText('1 / 24');
+  await expect(page.locator('.stats-grid .stat').first()).toContainText('1 / 32');
  });
 }

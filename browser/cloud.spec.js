@@ -56,13 +56,13 @@ test('a second device restores completed lessons, cursor and writing; another ac
   expect(server.rows.get(users.A.id).state.lessonDrafts[3].writing).toBe('I work in an office.');
   const b=await browser.newContext();contexts.push(b);await server.attach(b);
   const second=await login(b,'A');
-  await expect(second.locator('.main .side-card').first()).toContainText('เรียนแล้ว 1 จาก 24 บท');
+  await expect(second.locator('.main .side-card').first()).toContainText('เรียนแล้ว 1 จาก 32 บท');
   await second.locator('.main [data-lesson="3"]').click();
   await expect(second.locator('#writing')).toHaveValue('I work in an office.');
   await expect(second.locator('.progress-info')).toContainText('อ่านและเขียน');
   const other=await browser.newContext();contexts.push(other);await server.attach(other);
   const otherPage=await login(other,'B');
-  await expect(otherPage.locator('.main .side-card').first()).toContainText('เรียนแล้ว 0 จาก 24 บท');
+  await expect(otherPage.locator('.main .side-card').first()).toContainText('เรียนแล้ว 0 จาก 32 บท');
   expect(server.rows.get(users.B.id).state.completed).toEqual([]);
  }finally{await Promise.all(contexts.map(c=>c.close()));}
 });
