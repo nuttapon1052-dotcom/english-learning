@@ -304,3 +304,37 @@ button{color:inherit}a{color:var(--blue)}button{transition:background-color .15s
  .vocab-source-tabs{width:100%}.vocab-source-tabs button{flex:1;justify-content:center;font-size:11px;padding:9px 7px;gap:5px}.vocab-source-tabs .ui-icon{width:17px;height:17px}
  .basic-quiz .actions .btn{width:100%}.quiz-word>strong{font-size:28px}
 }
+
+/* AI illustrations: three shared atlases, stable crops and no card layout shift. */
+.vocab-picture{position:relative;display:block;overflow:hidden;isolation:isolate;width:100%;max-width:240px;aspect-ratio:1;background:#fff;border-radius:14px;margin:2px auto 20px;contain:paint}
+.vocab-picture img{position:absolute;display:block;width:calc(var(--art-cols)*100%);height:calc(var(--art-rows)*100%);max-width:none;left:var(--art-x);top:var(--art-y);object-fit:fill;pointer-events:none;user-select:none}
+.vocab-picture-preview{flex-shrink:0;width:58px;height:58px;margin:0;border-radius:13px;border:1px solid var(--category-line);background:#fff}
+.basic-word-card:has(.vocab-picture) .basic-word-heading{margin-top:4px}
+.number-reader{background:#fff;border:1px solid #d6e1ca;border-radius:20px;margin:0 0 28px;overflow:hidden}
+.number-reader>summary{display:flex;align-items:center;gap:16px;padding:20px 24px;cursor:pointer;list-style:none}
+.number-reader>summary::-webkit-details-marker{display:none}
+.number-reader>summary:focus-visible{outline:3px solid var(--blue);outline-offset:-4px;border-radius:20px}
+.reader-symbol{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#eaf1df;color:#588047;flex-shrink:0}
+.number-reader summary strong{display:block;font-size:17px;font-weight:600;line-height:1.7}
+.number-reader summary small{display:block;font-size:12px;line-height:1.8;color:#677b5a}
+.reader-expand{margin-left:auto;font:24px 'DM Sans';color:#698753}
+.number-reader[open] .reader-expand{transform:rotate(45deg)}
+.number-reader-body{border-top:1px solid #e6eddd;padding:24px;background:#fbfcf8}
+.number-reader-body>label{font-size:13px;font-weight:600;display:block;margin:0 0 9px}
+#numberInput{font-family:'DM Sans';font-size:24px;letter-spacing:.015em;max-width:600px;padding:15px 18px}
+#numberInput[aria-invalid="true"]{border-color:#b45154;background:#fff9f8}
+#numberHint{font-size:11px;line-height:1.9;color:#6a7b5e;margin:9px 0 14px}
+.number-examples{display:flex;gap:8px;flex-wrap:wrap}
+.number-examples button{font:13px 'DM Sans';min-height:38px;padding:8px 13px;border-radius:999px;border:1px solid #d9e5c7;background:#f0f5e6;color:#4e6f3c}
+.number-examples button:hover{background:#e5efda}
+#numberError{color:#a64242;font-size:12px;line-height:1.9;margin:16px 0 0}
+#numberError:empty{display:none}
+.number-result{margin:20px 0;padding:22px 24px;background:#edf3e5;border:1px solid #dce7ce;border-radius:16px}
+.number-result[hidden]{display:none}
+#numberFormatted{display:block;font:13px 'DM Sans';color:#627d4b;margin:0 0 10px;overflow-wrap:anywhere}
+#numberEnglish{font:500 clamp(22px,2.3vw,30px)/1.55 'DM Sans';color:#2b5534;margin:0;letter-spacing:-.025em;overflow-wrap:anywhere}
+.number-thai{font-size:14px;line-height:1.9;color:#6f744c;margin:17px 0 0}
+.number-thai>span{display:block}.number-thai>span:first-child{font-size:10px;color:#788162;margin-bottom:4px}
+.number-style-note{font-size:11px;color:#6c7b60;line-height:1.95;margin:16px 0 0}
+@media(max-width:760px){.vocab-picture-preview{width:44px;height:44px;border-radius:11px}.number-reader>summary{padding:18px;gap:12px}.reader-symbol{width:38px;height:42px;border-radius:12px}.reader-symbol .ui-icon{width:22px;height:22px}.number-reader summary strong{font-size:15px}.number-reader summary small{font-size:11px}.number-reader-body{padding:20px 18px}.number-result{padding:18px}#numberInput{font-size:22px}.number-thai{font-size:13px}.vocab-picture{max-width:210px}}
+@media(max-width:440px){.basic-category .vocab-picture-preview{width:52px;height:52px;margin:0 0 10px}.vocab-picture{max-width:220px}.number-reader summary strong{font-size:14px}.number-reader summary small{font-size:10px}.number-reader>summary{gap:10px;padding:16px}.reader-expand{font-size:21px}#speakNumber{width:100%}#numberEnglish{font-size:23px}}
