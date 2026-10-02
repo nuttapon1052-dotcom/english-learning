@@ -113,7 +113,8 @@ import {basicVocabulary,vocabularyCategories} from '../src/basic-vocabulary.js';
  });
 
 test('vocabulary quiz gives feedback, prevents repeat scoring and retries only missed words',async({page})=>{
- await blankConfig(page);await page.goto('/english-learning/#vocab');
+ await blankConfig(page);await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/english-learning/#vocab');
+ await page.locator('[data-basic-category="days"]').click();
  await page.locator('#startBasicQuiz').click();
  let wrongId;
  for(let i=0;i<7;i++){

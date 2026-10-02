@@ -129,7 +129,8 @@ export function createVocabularyLibrary({getState,shell,review,setThaiSound,spea
   document.querySelector('#basicResultCount').textContent=mode==='contents'?`${catalogue.chapters.length} หมวด · ${basicVocabulary.length} คำ`:`${words.length} คำ${query.trim()?'ที่พบ':''}`;
   document.querySelector('#basicGroupTitle').textContent=mode==='contents'?'สารบัญของคุณ':query.trim()?'คำที่กำลังค้นหา':c?.title||'ทุกคำในเล่ม';
   document.querySelector('#basicTip').textContent=query.trim()?'ค้นหาได้ทั่วทั้งเล่มด้วยคำอังกฤษ คำแปลไทย หรือตัวเลข':c?.tip||'เลือกหมวดจากสารบัญ ฟังเสียง และลองพูดประโยคให้เป็นเรื่องของคุณ';
-  document.querySelector('#startBasicQuiz').disabled=!words.length;
+  document.querySelector('.book-study-tools').hidden=mode==='contents';
+  document.querySelector('#startBasicQuiz').disabled=mode==='contents'||!words.length;
   document.querySelector('#basicQuizSize').textContent=Math.min(10,words.length);
   document.querySelector('#basicSearch').value=query;
   document.querySelector('#basicUnreviewed').checked=unreviewed;
