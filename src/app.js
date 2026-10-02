@@ -239,7 +239,7 @@ function renderPractice() {
   bindSkills();
 }
 function vocabTabs(){
- return `<nav class="vocab-source-tabs" aria-label="ประเภทคลังคำศัพท์"><button data-vocab-source="basic" ${vocabSource==='basic'?'aria-current="page"':''}>${icon('sprout')} ศัพท์พื้นฐาน <span>${basicVocabulary.length}</span></button><button data-vocab-source="lessons" ${vocabSource==='lessons'?'aria-current="page"':''}>${icon('book')} จากบทเรียน <span>${state.learnedWords.length}</span></button></nav>`;
+ return `<nav class="vocab-source-tabs" aria-label="ประเภทคลังคำศัพท์"><button data-vocab-source="basic" ${vocabSource==='basic'?'aria-current="page"':''}>${icon('book')} สมุดศัพท์ <span>${basicVocabulary.length}</span></button><button data-vocab-source="lessons" ${vocabSource==='lessons'?'aria-current="page"':''}>${icon('book')} จากบทเรียน <span>${state.learnedWords.length}</span></button></nav>`;
 }
 function bindVocabTabs(){
  document.querySelectorAll('[data-vocab-source]').forEach(b=>b.onclick=()=>{vocabSource=b.dataset.vocabSource;renderVocab();});

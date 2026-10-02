@@ -98,21 +98,24 @@ test('foundation review syncs across devices and stays separate for another lear
  const server=createServer(),contexts=[];
  try{
   const first=await browser.newContext();contexts.push(first);await server.attach(first);
-  const page=await login(first,'A');
+  const page=await login(first,'A');await page.emulateMedia({reducedMotion:'reduce'});
   await page.locator('.desktop-nav [data-nav="vocab"]').click();
+  await page.locator('[data-basic-category="days"]').click();
   await page.locator('[data-review-word="days:monday"]').click();
   await expect.poll(()=>server.rows.get(users.A.id)?.state.basicWordsReviewed).toEqual(['days:monday']);
   const second=await browser.newContext();contexts.push(second);await server.attach(second);
-  const otherDevice=await login(second,'A');await otherDevice.locator('.desktop-nav [data-nav="vocab"]').click();
+  const otherDevice=await login(second,'A');await otherDevice.emulateMedia({reducedMotion:'reduce'});await otherDevice.locator('.desktop-nav [data-nav="vocab"]').click();
+  await otherDevice.locator('[data-basic-category="days"]').click();
   await expect(otherDevice.locator('[data-review-word="days:monday"]')).toBeDisabled();
-  await otherDevice.locator('[data-basic-category="fruit"]').click();
+  await otherDevice.locator('#bookContents').click();await otherDevice.locator('[data-basic-category="fruit"]').click();
   await otherDevice.locator('[data-review-word="fruit:apple"]').click();
   await expect.poll(()=>server.rows.get(users.A.id)?.state.basicWordsReviewed).toEqual(['days:monday','fruit:apple']);
   await page.reload();await expect(page.locator('[data-basic-total]')).toHaveText('2');
   expect(server.rows.get(users.A.id).state.completed).toEqual([]);
   expect(server.rows.get(users.A.id).state.learnedWords).toEqual([]);
   const third=await browser.newContext();contexts.push(third);await server.attach(third);
-  const different=await login(third,'B');await different.locator('.desktop-nav [data-nav="vocab"]').click();
+  const different=await login(third,'B');await different.emulateMedia({reducedMotion:'reduce'});await different.locator('.desktop-nav [data-nav="vocab"]').click();
+  await different.locator('[data-basic-category="days"]').click();
   await expect(different.locator('[data-basic-total]')).toHaveText('0');
   await expect(different.locator('[data-review-word="days:monday"]')).toBeEnabled();
  }finally{await Promise.all(contexts.map(c=>c.close()));}
