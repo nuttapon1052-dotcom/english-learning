@@ -1,18 +1,47 @@
+import {readNumber,numberPronunciation} from './number-reader.js';
+import {vocabularyArtwork,vocabularyArtPreviews} from './vocabulary-art.js';
 import {basicVocabulary,vocabularyCategories,findBasicWords,makeVocabularyQuiz} from './basic-vocabulary.js';
 
 // Only the reviewed word IDs are persisted. A quiz score belongs to its current round.
 export function createVocabularyLibrary({getState,shell,review,setThaiSound,speak,icon,esc}){
- let category='days',query='',unreviewed=false,quiz=null;
+ let category='days',query='',unreviewed=false,quiz=null,numberInput='167';
  const categoryById=new Map(vocabularyCategories.map(c=>[c.id,c]));
  const selectedWords=()=>findBasicWords({category,query,unreviewed,reviewed:getState().basicWordsReviewed});
  const reviewed=()=>new Set(getState().basicWordsReviewed);
- function reset(){category='days';query='';unreviewed=false;quiz=null;}
+ function reset(){category='days';query='';unreviewed=false;quiz=null;numberInput='167';}
  function soundButtons(){
   document.querySelectorAll('[data-vocab-speak]').forEach(b=>b.onclick=()=>speak(b.dataset.vocabSpeak));
  }
+
+ function artPicture(id,label,{preview=false}={}){
+  const art=vocabularyArtwork[id];if(!art)return '';
+  return `<span class="vocab-picture ${preview?'vocab-picture-preview':''}" ${preview?'aria-hidden="true"':`role="img" aria-label="ภาพประกอบ ${esc(label)}"`} style="--art-cols:${art.columns};--art-rows:${art.rows};--art-x:${-art.col*100}%;--art-y:${-art.row*100}%"><img src="${import.meta.env.BASE_URL+art.file}" alt="" loading="lazy" decoding="async" draggable="false"></span>`;
+ }
+ function numberReaderPanel(){
+  return `<details class="number-reader" id="numberReader" ${category==='numbers'?'open':''}><summary><span class="reader-symbol">${icon('numbers')}</span><span><strong>พิมพ์ตัวเลข แล้วอ่านเป็นอังกฤษ</strong><small>ลอง 167 หรือ 21,425 · พร้อมฟังเสียง</small></span><span class="reader-expand" aria-hidden="true">+</span></summary><div class="number-reader-body"><label for="numberInput">อยากอ่านเลขอะไร?</label><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="32" class="text-input" id="numberInput" value="${esc(numberInput)}" aria-describedby="numberHint numberError" placeholder="เช่น 21,425"><p id="numberHint">พิมพ์มีหรือไม่มีคอมมาก็ได้ · จำนวนเต็มสูงสุด 15 หลัก และทศนิยม 6 ตำแหน่ง</p><div class="number-examples" aria-label="ตัวเลขตัวอย่าง">${['167','21,425','1,000,000','12.05'].map(n=>`<button type="button" data-number-example="${n}">${n}</button>`).join('')}</div><p id="numberError" role="status"></p><div class="number-result" id="numberResult" aria-live="polite" aria-atomic="true"><span class="eyebrow">READ IT OUT LOUD</span><span id="numberFormatted"></span><p lang="en" id="numberEnglish"></p><p class="number-thai"><span>คำอ่านไทยโดยประมาณ</span><span id="numberThai"></span></p></div><button type="button" class="btn primary" id="speakNumber">${icon('volume')} ฟังคำอ่านตัวเลข</button><p class="number-style-note">ใช้รูปแบบอเมริกัน เช่น one hundred sixty-seven · แบบอังกฤษอาจเติม and เป็น one hundred and sixty-seven<br>คำอ่านไทยช่วยเริ่มต้น ควรฟังเสียงควบคู่ไปด้วย</p></div></details>`;
+ }
+ function updateNumber(){
+  const result=readNumber(numberInput),input=document.querySelector('#numberInput');
+  input.setAttribute('aria-invalid',String(!result.ok&&result.code!=='empty'));
+  document.querySelector('#numberError').textContent=result.ok?'':result.error;
+  document.querySelector('#numberResult').hidden=!result.ok;
+  document.querySelector('#speakNumber').disabled=!result.ok;
+  document.querySelector('#numberFormatted').textContent=result.ok?result.formatted:'';
+  document.querySelector('#numberEnglish').textContent=result.ok?result.english:'';
+  document.querySelector('#numberThai').textContent=result.ok?numberPronunciation(result.english):'';
+ }
+ function bindNumberReader(){
+  document.querySelector('#numberInput').oninput=e=>{numberInput=e.target.value;updateNumber();};
+  document.querySelectorAll('[data-number-example]').forEach(b=>b.onclick=()=>{
+   numberInput=b.dataset.numberExample;document.querySelector('#numberInput').value=numberInput;updateNumber();
+  });
+  document.querySelector('#speakNumber').onclick=()=>{const result=readNumber(numberInput);if(result.ok)speak(result.english);};
+  updateNumber();
+ }
+
  function wordCard(w){
   const seen=reviewed().has(w.id),c=categoryById.get(w.category);
-  return `<article class="basic-word-card card tone-${c.color}" data-basic-word="${w.id}"><div class="word-card-top"><span class="word-category">${c.title}</span><button class="sound-btn" data-vocab-speak="${esc(w.en)}" aria-label="ฟังคำว่า ${esc(w.en)}">${icon('volume')}</button></div><div class="basic-word-heading"><span class="word-symbol" aria-hidden="true">${w.symbol?esc(w.symbol):icon(c.icon)}</span><h3 lang="en">${esc(w.en)}</h3></div><p class="basic-translation">${esc(w.th)}</p>${getState().showThaiSound?`<p class="thai-sound">เสียงประมาณ: ${esc(w.sound)}</p>`:''}<details class="word-example"><summary>ลองใช้ในประโยค</summary><p lang="en">${esc(w.example)}</p><p>${esc(w.translation)}</p><button class="text-link" data-vocab-speak="${esc(w.example)}">ฟังประโยค ${icon('volume')}</button></details><button class="review-word ${seen?'reviewed':''}" data-review-word="${w.id}" ${seen?'disabled':''}>${icon(seen?'check':'cards')}${seen?'ทบทวนแล้ว':'ทำเครื่องหมายว่าทบทวนแล้ว'}</button></article>`;
+  return `<article class="basic-word-card card tone-${c.color}" data-basic-word="${w.id}"><div class="word-card-top"><span class="word-category">${c.title}</span><button class="sound-btn" data-vocab-speak="${esc(w.en)}" aria-label="ฟังคำว่า ${esc(w.en)}">${icon('volume')}</button></div>${artPicture(w.id,w.th)}<div class="basic-word-heading">${vocabularyArtwork[w.id]?'':`<span class="word-symbol" aria-hidden="true">${w.symbol?esc(w.symbol):icon(c.icon)}</span>`}<h3 lang="en">${esc(w.en)}</h3></div><p class="basic-translation">${esc(w.th)}</p>${getState().showThaiSound?`<p class="thai-sound">เสียงประมาณ: ${esc(w.sound)}</p>`:''}<details class="word-example"><summary>ลองใช้ในประโยค</summary><p lang="en">${esc(w.example)}</p><p>${esc(w.translation)}</p><button class="text-link" data-vocab-speak="${esc(w.example)}">ฟังประโยค ${icon('volume')}</button></details><button class="review-word ${seen?'reviewed':''}" data-review-word="${w.id}" ${seen?'disabled':''}>${icon(seen?'check':'cards')}${seen?'ทบทวนแล้ว':'ทำเครื่องหมายว่าทบทวนแล้ว'}</button></article>`;
  }
  function bindWords(){
   soundButtons();
@@ -43,7 +72,8 @@ export function createVocabularyLibrary({getState,shell,review,setThaiSound,spea
   quiz=null;
   shell(`<header class="page-head basic-library-head"><div><p class="eyebrow">A WORD FOR YOUR EVERYDAY</p><h1>คำเล็ก ๆ ที่ใช้ทุกวัน.</h1><p>พื้นฐานที่เปิดเรียนได้ทันที แยกจากเส้นทาง 32 บทเรียน</p></div><span class="basic-cover" aria-hidden="true">${icon('cards')}<small>abc</small></span></header>
   <section class="basic-intro"><div><span class="pill">FOUNDATION VOCABULARY</span><h2>${basicVocabulary.length} คำ เริ่มจากโลกใกล้ตัว</h2><p>เลือกหมวด → ฟังเสียง → ลองใช้ → ทบทวนสั้น ๆ</p></div><div class="basic-progress"><strong><span data-basic-total>${reviewed().size}</span><small> / ${basicVocabulary.length}</small></strong><span>คำที่เคยทบทวน</span></div></section>
-  <div class="basic-categories" role="group" aria-label="หมวดศัพท์พื้นฐาน">${vocabularyCategories.map(c=>{const words=basicVocabulary.filter(w=>w.category===c.id);return `<button class="basic-category tone-${c.color} ${category===c.id?'active':''}" data-basic-category="${c.id}" aria-pressed="${category===c.id}"><span class="category-illustration">${icon(c.icon)}</span><span><small>${c.en}</small><strong>${c.title}</strong><span class="category-caption">${words.length} คำ · ทบทวน <b data-category-count="${c.id}">${words.filter(w=>reviewed().has(w.id)).length}</b></span></span></button>`;}).join('')}</div>
+  <div class="basic-categories" role="group" aria-label="หมวดศัพท์พื้นฐาน">${vocabularyCategories.map(c=>{const words=basicVocabulary.filter(w=>w.category===c.id);return `<button class="basic-category tone-${c.color} ${category===c.id?'active':''}" data-basic-category="${c.id}" aria-pressed="${category===c.id}">${vocabularyArtPreviews[c.id]?artPicture(vocabularyArtPreviews[c.id],c.title,{preview:true}):`<span class="category-illustration">${icon(c.icon)}</span>`}<span><small>${c.en}</small><strong>${c.title}</strong><span class="category-caption">${words.length} คำ · ทบทวน <b data-category-count="${c.id}">${words.filter(w=>reviewed().has(w.id)).length}</b></span></span></button>`;}).join('')}</div>
+  ${numberReaderPanel()}
   <div class="basic-toolbar"><label class="search-field"><span>${icon('search')}</span><input id="basicSearch" type="search" value="${esc(query)}" placeholder="ค้นหาทุกหมวด เช่น apple แมว 20" aria-label="ค้นหาศัพท์พื้นฐานทุกหมวด"></label><button class="btn secondary" id="showAllBasic" aria-pressed="${category==='all'&&!query}">ดูทุกคำ</button></div>
   <div class="basic-preferences"><label class="toggle"><input id="basicThaiSound" type="checkbox" ${getState().showThaiSound?'checked':''}>คำอ่านไทยโดยประมาณ</label><label class="toggle"><input id="basicUnreviewed" type="checkbox" ${unreviewed?'checked':''}>เฉพาะคำที่ยังไม่ทบทวน</label></div>
   <section class="basic-section-head"><div><p class="eyebrow">EXPLORE & PRACTICE</p><h2 id="basicGroupTitle"></h2><p id="basicTip"></p></div><button class="btn primary" id="startBasicQuiz">${icon('target')} ทบทวน <span id="basicQuizSize">10</span> คำ</button></section>
@@ -56,7 +86,7 @@ export function createVocabularyLibrary({getState,shell,review,setThaiSound,spea
   document.querySelector('#basicThaiSound').onchange=e=>{setThaiSound(e.target.checked);renderResults();};
   document.querySelector('#basicUnreviewed').onchange=e=>{unreviewed=e.target.checked;renderResults();};
   document.querySelector('#startBasicQuiz').onclick=()=>startQuiz(selectedWords());
-  renderResults();
+  renderResults();bindNumberReader();
  }
  function startQuiz(words){
   const questions=makeVocabularyQuiz(words);
