@@ -1,5 +1,10 @@
 // Original 24 × 24 outline icons. Decorative SVGs inherit the control's accessible label.
 const paths = {
+ "bookmark": '<path d="M6 3h12v19l-6-4-6 4Z"/><path d="M9 7h6"/>',
+ "chevron-left": '<path d="m15 5-7 7 7 7"/>',
+ "chevron-right": '<path d="m9 5 7 7-7 7"/>',
+ "contents": '<path d="M8 5h13M8 12h13M8 19h13"/><circle cx="3" cy="5" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="19" r="1"/>',
+
  "fruit": '<path d="M12 7c-5-4-10 0-9 6 1 6 5 9 9 7 4 2 8-1 9-7 1-6-4-10-9-6Z"/><path d="M12 7c0-4 2-5 5-5 0 3-2 5-5 5Zm0 0L9 3"/>',
  "paw": '<ellipse cx="6" cy="8" rx="2" ry="3"/><ellipse cx="11" cy="5" rx="2" ry="3"/><ellipse cx="17" cy="7" rx="2" ry="3"/><path d="M6 17c0-3 3-6 6-6s6 3 6 6c0 4-4 2-6 2s-6 2-6-2Z"/><ellipse cx="21" cy="12" rx="1.5" ry="2.5"/>',
  "numbers": '<path d="m5 5 2-2v8M4 11h6m4-6c0-3 6-3 6 0 0 2-6 4-6 6h6M4 17h5m-5 4h5m7-7v8m-4-4h8"/>',

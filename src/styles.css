@@ -338,3 +338,185 @@ button{color:inherit}a{color:var(--blue)}button{transition:background-color .15s
 .number-style-note{font-size:11px;color:#6c7b60;line-height:1.95;margin:16px 0 0}
 @media(max-width:760px){.vocab-picture-preview{width:44px;height:44px;border-radius:11px}.number-reader>summary{padding:18px;gap:12px}.reader-symbol{width:38px;height:42px;border-radius:12px}.reader-symbol .ui-icon{width:22px;height:22px}.number-reader summary strong{font-size:15px}.number-reader summary small{font-size:11px}.number-reader-body{padding:20px 18px}.number-result{padding:18px}#numberInput{font-size:22px}.number-thai{font-size:13px}.vocab-picture{max-width:210px}}
 @media(max-width:440px){.basic-category .vocab-picture-preview{width:52px;height:52px;margin:0 0 10px}.vocab-picture{max-width:220px}.number-reader summary strong{font-size:14px}.number-reader summary small{font-size:10px}.number-reader>summary{gap:10px;padding:16px}.reader-expand{font-size:21px}#speakNumber{width:100%}#numberEnglish{font-size:23px}}
+
+/* Picture dictionary. All reader styles are scoped to this vocabulary view. */
+.vocabulary-book{--book-paper:#fffaf0;--book-ink:#29433d;--book-gold:#aa8451;--book-line:#ddd4c1;max-width:1240px;margin:0 auto;color:var(--book-ink)}
+.main:has(.vocabulary-book) .vocab-source-tabs{background:#eee9dc;border-color:#e0d8c7;margin-bottom:24px}
+.main:has(.vocabulary-book) .vocab-source-tabs button[aria-current]{background:#fffaf0}
+.vocabulary-book .book-library-head{margin-bottom:24px;align-items:flex-start}
+.vocabulary-book .book-library-head h1{font-size:clamp(28px,3.3vw,44px);font-weight:500;letter-spacing:-.045em;margin:4px 0 10px}
+.vocabulary-book .book-library-head>div>p:last-child{font-size:13px;color:#7e8172;line-height:1.8;margin:0}
+.vocabulary-book .eyebrow{color:#95774c;letter-spacing:.16em}
+.book-reading-progress{text-align:right;padding:8px 0;flex-shrink:0}
+.book-reading-progress>span{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:11px;color:#7b7969}
+.book-reading-progress>span .ui-icon{width:14px;height:14px}
+.book-reading-progress>strong{display:block;font:500 30px 'DM Sans';color:#455f4c;margin-top:6px}
+.book-reading-progress small{font-size:14px;color:#999680;font-weight:400}
+.book-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
+.book-toolbar .search-field{max-width:none;background:#fffdf7;border-color:var(--book-line);border-radius:10px;min-height:48px;padding:11px 14px}
+.book-toolbar .search-field .ui-icon{display:block;width:19px;height:19px;color:#8d876e}
+.book-toolbar .search-field input{font-size:13px}
+.book-tool-button{border:1px solid var(--book-line);border-radius:10px;min-height:48px;background:#fffdf7;padding:11px 16px;font-size:12px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.book-tool-button .ui-icon{width:18px;height:18px}
+.book-tool-button:hover{background:#eee7d7;border-color:#b9a47d}
+.book-preferences{display:flex;align-items:center;flex-wrap:wrap;gap:10px 24px;padding:16px 0 22px}
+.book-preferences .toggle{font-size:11px;color:#777967;gap:8px}.book-preferences input{accent-color:#41624d}
+.book-chapter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 6px 16px}
+.book-chapter-heading h2{font-size:16px;font-weight:500;margin:0;line-height:1.8}
+.book-chapter-heading h2:focus{outline:none}
+.book-chapter-heading>span{font-size:11px;color:#8a826b;white-space:nowrap}
+.book-desk{padding:20px 16px 28px;background:radial-gradient(ellipse at 50% 80%,#d8cbb44a,transparent 70%),#eee9df;border:1px solid #e3dccd;border-radius:22px}
+.book-frame{position:relative;padding:9px 10px 13px;border-radius:11px;background:#456254;box-shadow:0 20px 30px -18px #3a33285c,0 8px 12px -6px #3a332847,inset 0 1px 0 #ffffff30;isolation:isolate;touch-action:pan-y}
+.book-frame:before,.book-frame:after{content:"";position:absolute;left:14px;right:14px;bottom:7px;height:6px;border-radius:0 0 6px 6px;background:repeating-linear-gradient(to bottom,#f9f1df 0,#f9f1df 1px,#d6cbb5 1px,#d6cbb5 2px);z-index:-1}
+.book-frame:after{left:12px;right:12px;bottom:4px;height:3px}
+.book-spread{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));position:relative;min-width:0}
+.book-paper{position:relative;display:flex;flex-direction:column;min-width:0;min-height:680px;padding:28px 32px 20px;background:linear-gradient(110deg,#fffdf6,#fff8e9);border:1px solid #ebe2d1;color:var(--book-ink);overflow:hidden}
+.book-paper:first-child{border-radius:4px 0 0 4px;background:linear-gradient(90deg,#fcf7ec 0%,#fffaf0 90%,#e4d9c6 100%);box-shadow:inset -1px 0 0 #d1c3a840}
+.book-paper:last-child{border-radius:0 4px 4px 0;background:linear-gradient(90deg,#dfd3bd 0%,#fffaf0 7%,#fffdf6 100%);box-shadow:inset 1px 0 0 #d1c3a840}
+.book-spine{position:absolute;left:50%;top:9px;bottom:13px;width:14px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,#75644719 35%,#544c341f 50%,#75644712 65%,transparent);pointer-events:none;z-index:2}
+.book-paper-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:18px;border-top:1px solid #ded5c3;font-size:10px;color:#948972}
+.book-folio{font:italic 16px Georgia,serif;color:#9e8a62}
+.vocabulary-book .book-word-entry{padding:0;border-radius:0;overflow:visible;display:flex;flex-direction:column;flex:1;background:transparent;box-shadow:none;border:0}
+.vocabulary-book .word-card-top{margin:0 0 18px;min-height:28px}
+.vocabulary-book .word-category{padding:0;background:none;color:#92876e;letter-spacing:.14em;text-transform:uppercase;font:11px 'DM Sans'}
+.book-word-mark{color:#c2b38e;display:grid;place-items:center}.book-word-mark .ui-icon{width:18px;height:22px;stroke-width:1.3}
+.book-word-mark.is-reviewed{color:#4c7b53}.book-word-mark.is-reviewed .ui-icon{fill:#4c7b531a}
+.vocabulary-book .book-word-entry .vocab-picture{max-width:210px;border-radius:50% 50% 44% 44%;aspect-ratio:1;margin:0 auto 20px;border:0;box-shadow:0 0 0 1px #e4d9c6;background:#f9f1df}
+.book-word-symbol{display:grid;place-items:center;align-self:center;width:min(100%,210px);aspect-ratio:1;margin:0 auto 20px;border:1px solid #d9cdb1;border-radius:50%;background:radial-gradient(circle,#fffdf2,#efe6ce);color:var(--category-ink);font:italic 500 clamp(32px,4vw,50px) Georgia,serif;letter-spacing:-.05em;overflow-wrap:anywhere;padding:14px}
+.book-word-symbol .ui-icon{width:80px;height:80px;stroke-width:1}
+.vocabulary-book .basic-word-heading{flex-direction:row;align-items:center;justify-content:center;gap:12px;margin:0 0 8px}
+.vocabulary-book .basic-word-heading h3{font:400 clamp(28px,2.8vw,42px)/1.15 Georgia,'DM Sans',serif;letter-spacing:-.04em;color:#28483d;min-width:0}
+.vocabulary-book .basic-word-heading .sound-btn{width:38px;height:38px;min-width:38px;padding:9px;border:1px solid #d7d2bd;background:#f5f1e4;color:#55705a;box-shadow:none}
+.vocabulary-book .basic-translation{text-align:center;font-size:17px;margin:0 0 12px;line-height:1.8;color:#627159}
+.vocabulary-book .book-word-entry>.thai-sound{text-align:center;margin:0 0 12px;font-size:11px;line-height:1.8;color:#8a7e64}
+.vocabulary-book .word-example{border-color:#ddd3bd;margin:10px 0 6px;padding:11px 0 4px}
+.vocabulary-book .word-example summary{color:#8a795b;font-size:11px;min-height:30px}
+.vocabulary-book .word-example p{font-size:12px;line-height:1.8;margin:8px 0;color:#79775e}
+.vocabulary-book .word-example p[lang]{font:15px/1.65 'DM Sans';color:#3c5849}
+.vocabulary-book .word-example .text-link{color:#5b7659;min-height:36px}
+.vocabulary-book .review-word{border:1px solid #d6cfb9;background:#f9f5e9;border-radius:8px;margin:12px 0 20px;min-height:44px;font-size:11px;color:#697556}
+.vocabulary-book .review-word:hover{background:#eee8d4}.vocabulary-book .review-word.reviewed{background:#e7ecdc;border-color:#d6ddc5;color:#4c6b44}
+.book-cover-page.book-paper{background:repeating-linear-gradient(135deg,#ffffff04 0,#ffffff04 1px,transparent 1px,transparent 4px),#284e43;border-color:#315747;padding:22px;color:#f4e3b9;box-shadow:inset -8px 0 20px #132b3266}
+.book-cover-border{height:100%;flex:1;border:1px solid #d8bc7759;outline:1px solid #d8bc7733;outline-offset:5px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.book-edition{font:9px/1.8 'DM Sans';letter-spacing:.2em;color:#cfcba4;margin:0 0 24px}
+.book-cover-emblem{display:grid;place-items:center;width:56px;height:56px;border:1px solid #d8bd7880;border-radius:50%;color:#e7ca87;margin-bottom:20px}
+.book-cover-emblem .ui-icon{width:29px;height:29px;stroke-width:1.1}
+.book-cover-border h2{font:400 clamp(38px,4vw,58px)/1.05 Georgia,serif;letter-spacing:-.035em;color:#f1dfad;margin:0 0 20px}
+.book-cover-border h2 em{font-size:.65em;font-weight:400}
+.book-cover-thai{font-size:15px;line-height:1.9;color:#e7e4c8;margin:0 0 22px}
+.book-cover-mosaic{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:min(100%,270px);margin:auto 0 20px}
+.vocabulary-book .book-cover-mosaic .vocab-picture-preview{width:100%;height:auto;aspect-ratio:1;border-radius:12px;border:1px solid #d9c69f88}
+.book-cover-count{font-size:11px;color:#d1d6b9;margin:0 0 18px}
+#openVocabularyBook{display:flex;align-items:center;gap:14px;border:1px solid #ccb27f;border-radius:7px;min-height:45px;background:#eedcb0;color:#2b4c3d;padding:10px 20px;font-size:12px}
+#openVocabularyBook .ui-icon{width:16px;height:16px}
+.book-cover-signature{font:italic 13px Georgia,serif;color:#a5b598;margin-top:24px}
+.book-contents-page{height:680px}
+.book-contents-heading{margin-bottom:15px}.book-contents-heading h2{font-size:23px;font-weight:500;margin:5px 0 8px;color:#394b3e;line-height:1.5}
+.book-contents-heading p{font-size:11px;line-height:1.8;color:#8e856c;margin:0}
+.book-toc-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:#c8b796 transparent}
+.book-toc-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px 0;min-height:56px;border:0;border-bottom:1px solid #e2d9c7;background:transparent;text-align:left}
+.book-toc-item:hover{background:#eee7d789;border-color:#c6b590}
+.book-chapter-number{font:italic 12px Georgia,serif;color:#a99a7e;min-width:18px;flex-shrink:0}
+.vocabulary-book .book-toc-item .vocab-picture-preview,.book-toc-symbol{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #dccfb9;display:grid;place-items:center;color:var(--category-ink);background:var(--category-paper)}
+.book-toc-symbol .ui-icon{width:19px;height:19px;stroke-width:1.2}
+.book-toc-name{min-width:0;flex:1}.book-toc-name strong{font-size:13px;font-weight:500;line-height:1.7;display:block;color:#465343}
+.book-toc-name small{display:block;font:9px/1.6 'DM Sans','Noto Sans Thai';color:#a0947a}.book-toc-name b{font-weight:400}
+.book-toc-folio{font:italic 13px Georgia,serif;color:#aa9470;flex-shrink:0}
+.book-end-page{align-items:center;justify-content:center;text-align:center;color:#7b775f}
+.book-end-symbol{display:grid;place-items:center;width:84px;height:84px;background:#ecebd8;border-radius:50%;margin-bottom:28px;color:#8b9d67}
+.book-end-symbol .ui-icon{width:40px;height:40px;stroke-width:1.1}
+.book-end-page h2{font-size:27px;font-weight:500;line-height:1.7;margin:10px 0}
+.book-end-page>p:not(.eyebrow){font-size:13px;line-height:1.9;margin:0 0 26px}
+.book-end-page .btn{font-size:12px}
+.book-empty-page{grid-column:1/-1;align-items:center;justify-content:center;text-align:center}
+.book-empty-page>span .ui-icon{width:42px;height:42px;stroke-width:1.1;color:#a89c7b}
+.book-empty-page h2{font-size:24px;font-weight:500;margin:22px 0 12px}
+.book-empty-page p{font-size:13px;color:#8a846c;margin:0 0 24px}.book-spread.is-empty+.book-spine{display:none}
+.book-reader-controls{display:grid;grid-template-columns:150px minmax(0,1fr) 150px;align-items:center;gap:14px;padding:23px 5px 12px}
+.book-page-button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;border:1px solid #d6cdb9;border-radius:10px;background:#fffaf0;padding:11px 14px;font-size:12px;white-space:nowrap;color:#51634b}
+.book-page-button .ui-icon{width:18px;height:18px;stroke-width:1.5}
+.book-page-button:hover:enabled{background:#eae5d6;border-color:#b8a279}
+.book-page-button:disabled{opacity:.38}
+.book-page-location{text-align:center;min-width:0}
+#bookPageStatus{display:block;font-size:11px;line-height:1.8;color:#887d63;margin-bottom:5px}
+.book-jump-label{display:flex;justify-content:center;align-items:center;gap:8px;font-size:10px;color:#978973}
+.book-jump-label select{max-width:220px;width:auto;min-width:0;min-height:34px;padding:4px 22px 4px 8px;border:1px solid #dfd6c4;border-radius:6px;background:#faf6ea;color:#6d6e54;font-size:11px}
+.book-gesture-hint{display:flex;align-items:center;justify-content:center;gap:7px;font-size:10px;color:#a2977d;margin:2px 0 24px}
+.book-gesture-hint .ui-icon{width:14px;height:14px;stroke-width:1.2}
+.book-study-tools{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 0;border-top:1px solid #ddd6c5;margin-top:10px}
+.book-chapter-tip{min-width:0;flex:1}.book-chapter-tip summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;font-size:12px;color:#6a7558;min-height:44px}.book-chapter-tip summary::-webkit-details-marker{display:none}
+.book-chapter-tip summary .ui-icon{width:16px;height:16px;color:#a58c60}
+.book-chapter-tip p{font-size:12px;line-height:1.9;color:#85816a;max-width:700px;margin:8px 0}
+.book-study-tools>.btn{min-height:44px;font-size:12px;flex-shrink:0}
+.vocabulary-book .number-reader{border-color:#d7cebb;background:#fffbf2}
+.vocabulary-book .number-reader>summary{padding:18px 20px}.vocabulary-book .number-reader summary strong{font-size:15px}
+.vocabulary-book .number-reader-body{background:#faf6eb;border-color:#e1d8c5}
+.vocabulary-book .book-footnote{font-size:10px;color:#9a907b;max-width:760px;margin-top:12px}
+.book-turn-layer{position:absolute;inset:9px 10px 13px;pointer-events:none;z-index:5;perspective:1800px;overflow:clip;isolation:isolate}
+.book-turn-leaf{position:absolute;top:0;bottom:0;width:50%;transform-style:preserve-3d;will-change:transform}
+.book-turn-leaf.turn-forward{left:50%;transform-origin:left center}
+.book-turn-leaf.turn-back{left:0;transform-origin:right center}
+.book-turn-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;box-shadow:0 0 28px #58452938;background:#fffaf0}
+.book-turn-back{transform:rotateY(180deg)}
+.book-turn-face>.book-paper,.book-turn-fixed>.book-paper{width:100%;height:100%;min-height:100%;border-radius:0}
+.book-turn-face:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#735e3921,transparent 30%,#ad996717)}
+.book-turn-fixed{position:absolute;top:0;bottom:0;width:50%;overflow:hidden}.book-turn-fixed.fixed-left{left:0}.book-turn-fixed.fixed-right{right:0}
+@media(max-width:1100px) and (min-width:901px){
+ .book-paper{padding:24px 24px 18px}.book-cover-border{padding:25px 15px}
+ .book-toc-item{gap:7px}.book-chapter-number{display:none}.book-toc-name strong{font-size:12px}
+}
+@media(max-width:900px){
+ .book-desk{padding:16px 12px 22px}
+ .book-frame{max-width:600px;margin:0 auto}
+ .book-spread{grid-template-columns:minmax(0,1fr)}
+ .book-paper,.book-paper:first-child,.book-paper:last-child{border-radius:4px;background:linear-gradient(90deg,#e9dec8 0%,#fffaf0 5%,#fffdf6 100%);box-shadow:inset 1px 0 0 #d1c3a840}
+ .book-spine{left:13px;width:8px;transform:none;background:linear-gradient(90deg,#7f6c3426,transparent)}
+ .book-word-page{min-height:660px}
+ .book-turn-leaf.turn-single{width:100%;left:0}.book-turn-leaf.turn-single.turn-back{transform-origin:right center}
+ .book-reader-controls{grid-template-columns:130px minmax(0,1fr) 130px}
+}
+@media(max-width:600px){
+ .main:has(.vocabulary-book) .vocab-source-tabs{margin-bottom:20px}
+ .vocabulary-book .book-library-head{gap:12px;margin-bottom:20px}
+ .vocabulary-book .book-library-head h1{font-size:27px;line-height:1.5;margin:2px 0 8px}
+ .vocabulary-book .book-library-head>div>p:last-child{font-size:11px}
+ .vocabulary-book .book-library-head .eyebrow{font-size:8px;letter-spacing:.1em}
+ .book-reading-progress{padding-top:12px}.book-reading-progress>span{font-size:9px}.book-reading-progress>span .ui-icon{display:none}
+ .book-reading-progress>strong{font-size:23px}.book-reading-progress small{font-size:10px}
+ .book-toolbar{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+ .book-toolbar .search-field{grid-column:1/-1;min-height:46px}.book-toolbar .search-field input{font-size:12px}
+ .book-tool-button{min-height:42px;padding:9px 12px;font-size:11px;justify-content:center}.book-tool-button .ui-icon{width:16px;height:16px}
+ .book-preferences{padding:14px 0 18px;gap:10px 16px}.book-preferences .toggle{font-size:10px}
+ .book-chapter-heading{margin:0 0 12px}.book-chapter-heading h2{font-size:14px}.book-chapter-heading>span{font-size:10px}
+ .book-desk{padding:10px 7px 16px;border-radius:15px}
+ .book-frame{padding:6px 6px 11px;border-radius:7px}
+ .book-paper{padding:21px 19px 17px;min-height:620px}
+ .book-contents-page{height:620px}
+ .book-contents-heading h2{font-size:22px}.book-contents-heading p{font-size:10px}
+ .book-toc-item{gap:7px;min-height:54px;padding:9px 0}.book-chapter-number{font-size:10px;min-width:13px}
+ .vocabulary-book .book-toc-item .vocab-picture-preview,.book-toc-symbol{width:28px;height:28px;border-radius:7px}
+ .book-toc-name strong{font-size:11px;line-height:1.8}.book-toc-name small{font-size:8px}.book-toc-folio{font-size:11px}
+ .book-spine{top:6px;bottom:11px;left:9px;width:6px}
+ .vocabulary-book .book-word-entry .vocab-picture,.book-word-symbol{max-width:175px;margin-bottom:18px}
+ .vocabulary-book .book-word-entry .word-card-top{margin-bottom:16px}
+ .vocabulary-book .basic-word-heading h3{font-size:31px}
+ .vocabulary-book .basic-word-heading{gap:8px}
+ .vocabulary-book .basic-translation{font-size:15px;margin-bottom:8px}
+ .vocabulary-book .word-example p[lang]{font-size:14px;line-height:1.75}
+ .vocabulary-book .word-example p{font-size:11px}
+ .vocabulary-book .review-word{font-size:10px;margin-bottom:15px;min-height:44px}
+ .book-paper-footer{font-size:9px;padding-top:14px}.book-folio{font-size:14px}
+ .book-reader-controls{grid-template-columns:1fr 1fr;gap:10px;padding:17px 0 8px}
+ .book-page-location{grid-column:1/-1;grid-row:1;margin-bottom:3px}
+ .book-page-button{font-size:11px;padding:10px;min-height:46px}
+ .book-jump-label select{max-width:170px}
+ .book-gesture-hint{font-size:9px;margin-bottom:18px}
+ .book-study-tools{gap:10px;flex-wrap:wrap;padding:17px 0}
+ .book-study-tools>.btn{font-size:11px;padding:10px 13px}
+ .book-chapter-tip summary{font-size:11px;min-height:42px}.book-chapter-tip p{font-size:11px}
+ .vocabulary-book .number-reader summary strong{font-size:13px}.vocabulary-book .number-reader>summary{padding:16px 15px}
+ .book-turn-layer{inset:6px 6px 11px}
+}
+@media(prefers-reduced-motion:reduce){.book-turn-leaf{will-change:auto}}
+
+.vocabulary-book .book-study-tools[hidden]{display:none}
