@@ -34,7 +34,7 @@ for(const width of [320,1440]){
  });
  test('AI illustrations load and crop correctly at '+width+'px',async({page})=>{
   await page.setViewportSize({width,height:900});await setup(page);
-  for(const [category,count] of [['fruit',16],['animals',20],['objects',24]]){
+  for(const [category,count] of [['fruit',16],['animals',20],['objects',24],['vegetables',16],['colors',12],['clothing',16],['transport',12],['places',12],['body',12]]){
    await page.locator('[data-basic-category="'+category+'"]').click();
    await expect(page.locator('.basic-word-card .vocab-picture')).toHaveCount(count);
    await expect(page.locator('.basic-word-card .word-symbol')).toHaveCount(0);
