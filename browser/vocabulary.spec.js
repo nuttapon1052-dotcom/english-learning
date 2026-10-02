@@ -10,7 +10,7 @@ for(const width of [320,768,1440]){
   await expect(page.locator('.basic-word-card')).toHaveCount(7);
   const noOverflow=async()=>expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
   await noOverflow();
-  for(const [category,count] of [['months',12],['numbers',41],['fruit',16],['animals',20],['objects',24]]){
+  for(const [category,count] of [['months',12],['numbers',41],['fruit',16],['animals',20],['objects',24],['vegetables',16],['colors',12],['clothing',16],['transport',12],['places',12],['body',12]]){
    await page.locator('[data-basic-category="'+category+'"]').click();
    await expect(page.locator('.basic-word-card')).toHaveCount(count);
    await noOverflow();
@@ -36,7 +36,7 @@ for(const width of [320,768,1440]){
   await page.locator('#basicSearch').fill('no-such-word');
   await expect(page.locator('#startBasicQuiz')).toBeDisabled();
   await page.locator('#resetBasicSearch').click();
-  await expect(page.locator('.basic-word-card')).toHaveCount(120);
+  await expect(page.locator('.basic-word-card')).toHaveCount(200);
   await noOverflow();
   await page.locator('[data-vocab-source="lessons"]').click();
   await expect(page.locator('.vocab-table')).toContainText('คำแรกของคุณ');

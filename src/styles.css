@@ -217,7 +217,7 @@ button{color:inherit}a{color:var(--blue)}button{transition:background-color .15s
 .basic-intro h2{font-size:22px;font-weight:500;margin:10px 0 7px}.basic-intro p{font-size:12px;color:#d0debc;margin:0;line-height:1.8}
 .basic-progress{min-width:135px;padding-left:24px;border-left:1px solid #ffffff30;display:grid;gap:7px}.basic-progress strong{font:500 40px 'DM Sans';letter-spacing:-.05em;color:#e0efad}
 .basic-progress strong small{font-size:18px;letter-spacing:0;color:#bbd3ad}.basic-progress>span{font-size:11px;color:#d7e4c5}
-.basic-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:28px}
+.basic-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:28px}
 .tone-sage{--category-ink:#4b7250;--category-paper:#eaf1e1;--category-line:#b4c9a4}
 .tone-sand{--category-ink:#947044;--category-paper:#f6eedc;--category-line:#d7c496}
 .tone-blue{--category-ink:#4e7291;--category-paper:#e9f1f5;--category-line:#adc6d9}
@@ -279,7 +279,7 @@ button{color:inherit}a{color:var(--blue)}button{transition:background-color .15s
 .basic-quiz-score+p{font-size:13px;color:#657859}
 .quiz-missed{padding:0;margin:0;list-style:none}.quiz-missed li{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
 .quiz-missed strong{display:block;font:500 18px 'DM Sans';color:#385938}.quiz-missed span span{display:block;font-size:12px;color:#66765a;margin-top:6px}
-@media(max-width:1200px){.basic-categories{gap:10px}.basic-category{gap:12px;padding:15px}.basic-category.active{padding:14px}.basic-category strong{font-size:14px}.category-illustration{width:40px;height:46px}.basic-word-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1200px){.basic-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.basic-category{gap:12px;padding:15px}.basic-category.active{padding:14px}.basic-category strong{font-size:14px}.category-illustration{width:40px;height:46px}.basic-word-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){
  .basic-cover{width:65px;height:65px;border-radius:20px}.basic-cover>.ui-icon{width:32px;height:32px}
  .basic-library-head h1{font-size:30px}.basic-library-head p:not(.eyebrow){font-size:12px;line-height:1.8}

@@ -66,9 +66,101 @@ const groups = {
     "objects:umbrella",
     "objects:shoes",
     "objects:glasses"
+  ],
+  "vegetables": [
+    "vegetables:carrot",
+    "vegetables:tomato",
+    "vegetables:potato",
+    "vegetables:onion",
+    "vegetables:cucumber",
+    "vegetables:cabbage",
+    "vegetables:lettuce",
+    "vegetables:broccoli",
+    "vegetables:cauliflower",
+    "vegetables:corn",
+    "vegetables:pumpkin",
+    "vegetables:mushroom",
+    "vegetables:spinach",
+    "vegetables:eggplant",
+    "vegetables:garlic",
+    "vegetables:chili-pepper"
+  ],
+  "colors": [
+    "colors:red",
+    "colors:blue",
+    "colors:yellow",
+    "colors:green",
+    "colors:orange",
+    "colors:purple",
+    "colors:pink",
+    "colors:brown",
+    "colors:black",
+    "colors:white",
+    "colors:gray",
+    "colors:gold"
+  ],
+  "clothing": [
+    "clothing:t-shirt",
+    "clothing:shirt",
+    "clothing:pants",
+    "clothing:jeans",
+    "clothing:shorts",
+    "clothing:skirt",
+    "clothing:dress",
+    "clothing:jacket",
+    "clothing:coat",
+    "clothing:sweater",
+    "clothing:socks",
+    "clothing:hat",
+    "clothing:cap",
+    "clothing:scarf",
+    "clothing:gloves",
+    "clothing:boots"
+  ],
+  "transport": [
+    "transport:car",
+    "transport:bus",
+    "transport:train",
+    "transport:bicycle",
+    "transport:motorcycle",
+    "transport:airplane",
+    "transport:boat",
+    "transport:ship",
+    "transport:taxi",
+    "transport:truck",
+    "transport:subway",
+    "transport:scooter"
+  ],
+  "places": [
+    "places:school",
+    "places:hospital",
+    "places:bank",
+    "places:supermarket",
+    "places:restaurant",
+    "places:café",
+    "places:library",
+    "places:park",
+    "places:airport",
+    "places:train-station",
+    "places:hotel",
+    "places:pharmacy"
+  ],
+  "body": [
+    "body:head",
+    "body:hair",
+    "body:face",
+    "body:eye",
+    "body:ear",
+    "body:nose",
+    "body:mouth",
+    "body:hand",
+    "body:arm",
+    "body:leg",
+    "body:foot",
+    "body:finger"
   ]
 };
 export const vocabularyArtwork = Object.fromEntries(Object.entries(groups).flatMap(([category,ids])=>ids.map((id,index)=>[id,{
  file:'vocab-art/'+category+'.png',columns:4,rows:ids.length/4,col:index%4,row:Math.floor(index/4)
 }])));
-export const vocabularyArtPreviews = {fruit:'fruit:apple',animals:'animals:cat',objects:'objects:book'};
+export const vocabularyArtPreviews = {"fruit":"fruit:apple","animals":"animals:cat","objects":"objects:book","vegetables":"vegetables:carrot","colors":"colors:red","clothing":"clothing:t-shirt","transport":"transport:car","places":"places:school","body":"body:head"};

@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {basicVocabulary,vocabularyCategories,findBasicWords,makeVocabularyQuiz} from '../src/basic-vocabulary.js';
 const wordsIn=id=>basicVocabulary.filter(w=>w.category===id);
-test('the standalone library has six complete groups and 120 stable unique entries',()=>{
- assert.deepEqual(vocabularyCategories.map(c=>c.id),['days','months','numbers','fruit','animals','objects']);
- assert.equal(basicVocabulary.length,120);
- assert.equal(new Set(basicVocabulary.map(w=>w.id)).size,120);
+test('the standalone library has twelve complete groups and 200 stable unique entries',()=>{
+ assert.deepEqual(vocabularyCategories.map(c=>c.id),['days','months','numbers','fruit','animals','objects','vegetables','colors','clothing','transport','places','body']);
+ assert.equal(basicVocabulary.length,200);
+ assert.equal(new Set(basicVocabulary.map(w=>w.id)).size,200);
  for(const w of basicVocabulary){
   for(const key of ['id','category','en','th','sound','example','translation'])assert.ok(w[key]?.trim(),w.id+' '+key);
   assert.ok(vocabularyCategories.some(c=>c.id===w.category));
@@ -36,6 +36,14 @@ test('commonly confused basic nouns keep distinct meanings',()=>{
  assert.equal(byEn.get('fish').example,'There are three fish in the tank.');
  assert.equal(byEn.get('glasses').th,'แว่นตา');
 });
+test('new everyday categories include exact labels and useful examples',()=>{
+ assert.deepEqual(['vegetables','colors','clothing','transport','places','body'].map(c=>wordsIn(c).length),[16,12,16,12,12,12]);
+ for(const [id,en,th] of [['vegetables:carrot','carrot','แครอต'],['colors:gold','gold','สีทอง'],['clothing:t-shirt','T-shirt','เสื้อยืด'],['transport:subway','subway','รถไฟใต้ดิน'],['places:café','café','คาเฟ่'],['body:foot','foot','เท้า']]){
+  const word=basicVocabulary.find(w=>w.id===id);
+  assert.equal(word?.en,en,id);assert.equal(word?.th,th,id);
+  assert.ok(word.example.includes(en)||word.example.toLowerCase().includes(en.toLowerCase()),id);
+ }
+});
 test('search spans categories and supports Thai, case, numerals and review filters',()=>{
  assert.deepEqual(findBasicWords({category:'days',query:'APPLE'}).map(w=>w.id),['fruit:apple','fruit:pineapple']);
  assert.deepEqual(findBasicWords({query:'แมว'}).map(w=>w.id),['animals:cat']);
@@ -43,6 +51,8 @@ test('search spans categories and supports Thai, case, numerals and review filte
  assert.deepEqual(findBasicWords({query:'1st'}).map(w=>w.en),['first']);
  assert.equal(findBasicWords({category:'days',unreviewed:true,reviewed:['days:monday']}).length,6);
  assert.equal(findBasicWords({query:'<script>'}).length,0);
+ assert.deepEqual(findBasicWords({query:'cafe'}).map(w=>w.id),['places:café']);
+ assert.deepEqual(findBasicWords({query:'รถไฟใต้ดิน'}).map(w=>w.id),['transport:subway']);
 });
 test('quiz rounds are bounded and every question has one unique correct choice from its group',()=>{
  for(const c of vocabularyCategories){

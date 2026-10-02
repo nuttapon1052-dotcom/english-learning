@@ -959,6 +959,626 @@ const categories = [
         "ฉันสวมแว่นตา"
       ]
     ]
+  },
+  {
+    "id": "vegetables",
+    "title": "ผักและวัตถุดิบ",
+    "en": "Vegetables",
+    "icon": "sprout",
+    "color": "sage",
+    "tip": "ฝึกใช้ชื่อผักกับการซื้อของและทำอาหาร เช่น a carrot, two tomatoes และ some spinach. มะเขือเทศอยู่ในหมวดนี้ตามการใช้ทำอาหาร แม้ทางพฤกษศาสตร์เป็นผลไม้.",
+    "rows": [
+      [
+        "carrot",
+        "แครอต",
+        "แค-เริท",
+        "I need a carrot for the soup.",
+        "ฉันต้องการแครอตหนึ่งหัวสำหรับซุป"
+      ],
+      [
+        "tomato",
+        "มะเขือเทศ",
+        "ทะ-เม-โท",
+        "These tomatoes are ripe.",
+        "มะเขือเทศเหล่านี้สุกแล้ว"
+      ],
+      [
+        "potato",
+        "มันฝรั่ง",
+        "พะ-เท-โท",
+        "I cook a potato for lunch.",
+        "ฉันทำมันฝรั่งหนึ่งหัวเป็นอาหารกลางวัน"
+      ],
+      [
+        "onion",
+        "หัวหอม",
+        "อัน-เยิน",
+        "Cut one onion, please.",
+        "กรุณาหั่นหัวหอมหนึ่งหัว"
+      ],
+      [
+        "cucumber",
+        "แตงกวา",
+        "คิว-คัม-เบอร์",
+        "The cucumber is fresh.",
+        "แตงกวาสด"
+      ],
+      [
+        "cabbage",
+        "กะหล่ำปลี",
+        "แคบ-บิจ",
+        "We bought a cabbage.",
+        "เราซื้อกะหล่ำปลีหนึ่งหัว"
+      ],
+      [
+        "lettuce",
+        "ผักกาดหอม",
+        "เลท-ทิส",
+        "I put lettuce in the sandwich.",
+        "ฉันใส่ผักกาดหอมในแซนด์วิช"
+      ],
+      [
+        "broccoli",
+        "บรอกโคลี",
+        "บรอค-คะ-ลี",
+        "She likes broccoli.",
+        "เธอชอบบรอกโคลี"
+      ],
+      [
+        "cauliflower",
+        "กะหล่ำดอก",
+        "คอ-ลิ-ฟลาว-เออร์",
+        "We eat cauliflower with rice.",
+        "เรากินกะหล่ำดอกกับข้าว"
+      ],
+      [
+        "corn",
+        "ข้าวโพด",
+        "คอร์น",
+        "I bought some corn.",
+        "ฉันซื้อข้าวโพดมาบ้าง"
+      ],
+      [
+        "pumpkin",
+        "ฟักทอง",
+        "พัมพ์-คิน",
+        "This pumpkin is big.",
+        "ฟักทองลูกนี้ใหญ่"
+      ],
+      [
+        "mushroom",
+        "เห็ด",
+        "มัช-รูม",
+        "There are mushrooms in the soup.",
+        "มีเห็ดอยู่ในซุป"
+      ],
+      [
+        "spinach",
+        "ผักโขม",
+        "สพิน-นิช",
+        "I add spinach to my meal.",
+        "ฉันเติมผักโขมในอาหาร"
+      ],
+      [
+        "eggplant",
+        "มะเขือม่วง",
+        "เอก-แพลนท์",
+        "The eggplant is purple.",
+        "มะเขือม่วงมีสีม่วง"
+      ],
+      [
+        "garlic",
+        "กระเทียม",
+        "การ์-ลิค",
+        "Add some garlic to the pan.",
+        "ใส่กระเทียมลงในกระทะ"
+      ],
+      [
+        "chili pepper",
+        "พริก",
+        "ชิล-ลี เพพ-เพอร์",
+        "This chili pepper is hot.",
+        "พริกเม็ดนี้เผ็ด"
+      ]
+    ]
+  },
+  {
+    "id": "colors",
+    "title": "สีที่ใช้บ่อย",
+    "en": "Colors",
+    "icon": "spark",
+    "color": "sand",
+    "tip": "คำบอกสีวางหน้าคำนามได้ เช่น a red bag หรือวางหลัง is/are ได้ เช่น The bag is red. orange เป็นได้ทั้งสีส้มและผลส้ม ดูจากบริบท.",
+    "rows": [
+      [
+        "red",
+        "สีแดง",
+        "เรด",
+        "This apple is red.",
+        "แอปเปิลลูกนี้สีแดง"
+      ],
+      [
+        "blue",
+        "สีน้ำเงิน / สีฟ้า",
+        "บลู",
+        "The bag is blue.",
+        "กระเป๋าสีน้ำเงิน"
+      ],
+      [
+        "yellow",
+        "สีเหลือง",
+        "เยล-โล",
+        "The banana is yellow.",
+        "กล้วยสีเหลือง"
+      ],
+      [
+        "green",
+        "สีเขียว",
+        "กรีน",
+        "The leaf is green.",
+        "ใบไม้สีเขียว"
+      ],
+      [
+        "orange",
+        "สีส้ม",
+        "ออ-รินจ์",
+        "Her shirt is orange.",
+        "เสื้อของเธอสีส้ม"
+      ],
+      [
+        "purple",
+        "สีม่วง",
+        "เพอร์-เพิล",
+        "These grapes are purple.",
+        "องุ่นเหล่านี้สีม่วง"
+      ],
+      [
+        "pink",
+        "สีชมพู",
+        "พิงค์",
+        "The flower is pink.",
+        "ดอกไม้สีชมพู"
+      ],
+      [
+        "brown",
+        "สีน้ำตาล",
+        "บราวน์",
+        "My dog is brown.",
+        "สุนัขของฉันสีน้ำตาล"
+      ],
+      [
+        "black",
+        "สีดำ",
+        "แบล็ค",
+        "The cat is black.",
+        "แมวสีดำ"
+      ],
+      [
+        "white",
+        "สีขาว",
+        "ไวท์",
+        "My shirt is white.",
+        "เสื้อของฉันสีขาว"
+      ],
+      [
+        "gray",
+        "สีเทา",
+        "เกรย์",
+        "The sky is gray today.",
+        "วันนี้ท้องฟ้าสีเทา"
+      ],
+      [
+        "gold",
+        "สีทอง",
+        "โกลด์",
+        "The ring is gold.",
+        "แหวนมีสีทอง"
+      ]
+    ]
+  },
+  {
+    "id": "clothing",
+    "title": "เสื้อผ้าและของสวมใส่",
+    "en": "Clothing",
+    "icon": "bag",
+    "color": "lavender",
+    "tip": "ใช้ wear กับการสวมใส่ เช่น I wear a hat. คำว่า pants, jeans, shorts, socks, gloves และ boots มักใช้รูปพหูพจน์: My jeans are blue.",
+    "rows": [
+      [
+        "T-shirt",
+        "เสื้อยืด",
+        "ที-เชิร์ต",
+        "I wear a T-shirt.",
+        "ฉันใส่เสื้อยืด"
+      ],
+      [
+        "shirt",
+        "เสื้อเชิ้ต",
+        "เชิร์ต",
+        "My shirt is white.",
+        "เสื้อเชิ้ตของฉันสีขาว"
+      ],
+      [
+        "pants",
+        "กางเกงขายาว",
+        "แพนท์ส",
+        "These pants are black.",
+        "กางเกงตัวนี้สีดำ"
+      ],
+      [
+        "jeans",
+        "กางเกงยีนส์",
+        "จีนส์",
+        "My jeans are blue.",
+        "กางเกงยีนส์ของฉันสีน้ำเงิน"
+      ],
+      [
+        "shorts",
+        "กางเกงขาสั้น",
+        "ชอร์ทส์",
+        "He wears shorts.",
+        "เขาใส่กางเกงขาสั้น"
+      ],
+      [
+        "skirt",
+        "กระโปรง",
+        "สเกิร์ต",
+        "Her skirt is red.",
+        "กระโปรงของเธอสีแดง"
+      ],
+      [
+        "dress",
+        "ชุดเดรส",
+        "เดรส",
+        "She wears a blue dress.",
+        "เธอใส่ชุดเดรสสีน้ำเงิน"
+      ],
+      [
+        "jacket",
+        "เสื้อแจ็กเก็ต",
+        "แจค-คิท",
+        "Take a jacket with you.",
+        "เอาเสื้อแจ็กเก็ตไปด้วย"
+      ],
+      [
+        "coat",
+        "เสื้อโค้ต",
+        "โคท",
+        "My coat is warm.",
+        "เสื้อโค้ตของฉันอุ่น"
+      ],
+      [
+        "sweater",
+        "เสื้อกันหนาวแบบถัก",
+        "สเวท-เทอร์",
+        "This sweater is soft.",
+        "เสื้อกันหนาวตัวนี้นุ่ม"
+      ],
+      [
+        "socks",
+        "ถุงเท้า",
+        "ซอคส์",
+        "My socks are clean.",
+        "ถุงเท้าของฉันสะอาด"
+      ],
+      [
+        "hat",
+        "หมวกมีปีกโดยรอบ",
+        "แฮท",
+        "Wear a hat in the sun.",
+        "สวมหมวกเมื่ออยู่กลางแดด"
+      ],
+      [
+        "cap",
+        "หมวกแก๊ป",
+        "แคพ",
+        "His cap is red.",
+        "หมวกแก๊ปของเขาสีแดง"
+      ],
+      [
+        "scarf",
+        "ผ้าพันคอ",
+        "สคาร์ฟ",
+        "I need a scarf.",
+        "ฉันต้องการผ้าพันคอ"
+      ],
+      [
+        "gloves",
+        "ถุงมือ",
+        "กลัฟส์",
+        "These gloves are warm.",
+        "ถุงมือคู่นี้อุ่น"
+      ],
+      [
+        "boots",
+        "รองเท้าบูต",
+        "บูทส์",
+        "My boots are wet.",
+        "รองเท้าบูตของฉันเปียก"
+      ]
+    ]
+  },
+  {
+    "id": "transport",
+    "title": "ยานพาหนะ",
+    "en": "Transport",
+    "icon": "route",
+    "color": "blue",
+    "tip": "พูดการเดินทางด้วย by + พาหนะ เช่น by bus, by train, by car โดยทั่วไปไม่ใส่ a หลัง by. ถ้าพูดว่าขึ้นรถ ใช้ take a bus หรือ take a taxi.",
+    "rows": [
+      [
+        "car",
+        "รถยนต์",
+        "คาร์",
+        "I go to work by car.",
+        "ฉันไปทำงานโดยรถยนต์"
+      ],
+      [
+        "bus",
+        "รถบัส",
+        "บัส",
+        "We take a bus to town.",
+        "เรานั่งรถบัสเข้าเมือง"
+      ],
+      [
+        "train",
+        "รถไฟ",
+        "เทรน",
+        "The train leaves at nine.",
+        "รถไฟออกเก้าโมง"
+      ],
+      [
+        "bicycle",
+        "จักรยาน",
+        "ไบ-ซิ-เคิล",
+        "She rides a bicycle to school.",
+        "เธอขี่จักรยานไปโรงเรียน"
+      ],
+      [
+        "motorcycle",
+        "รถจักรยานยนต์",
+        "โม-เทอร์-ไซ-เคิล",
+        "He rides a motorcycle.",
+        "เขาขี่รถจักรยานยนต์"
+      ],
+      [
+        "airplane",
+        "เครื่องบิน",
+        "แอร์-เพลน",
+        "The airplane is in the sky.",
+        "เครื่องบินอยู่บนท้องฟ้า"
+      ],
+      [
+        "boat",
+        "เรือเล็ก",
+        "โบท",
+        "We cross the river by boat.",
+        "เราข้ามแม่น้ำด้วยเรือ"
+      ],
+      [
+        "ship",
+        "เรือใหญ่",
+        "ชิพ",
+        "The ship is at the port.",
+        "เรือใหญ่อยู่ที่ท่าเรือ"
+      ],
+      [
+        "taxi",
+        "แท็กซี่",
+        "แทค-ซี",
+        "I take a taxi to the hotel.",
+        "ฉันนั่งแท็กซี่ไปโรงแรม"
+      ],
+      [
+        "truck",
+        "รถบรรทุก",
+        "ทรัค",
+        "The truck carries food.",
+        "รถบรรทุกขนอาหาร"
+      ],
+      [
+        "subway",
+        "รถไฟใต้ดิน",
+        "ซับ-เวย์",
+        "We travel by subway.",
+        "เราเดินทางด้วยรถไฟใต้ดิน"
+      ],
+      [
+        "scooter",
+        "สกู๊ตเตอร์",
+        "สคู-เทอร์",
+        "The child rides a scooter.",
+        "เด็กขี่สกู๊ตเตอร์"
+      ]
+    ]
+  },
+  {
+    "id": "places",
+    "title": "สถานที่ในชีวิตประจำวัน",
+    "en": "Places",
+    "icon": "home",
+    "color": "peach",
+    "tip": "ใช้ at เพื่อบอกว่าอยู่ที่สถานที่ เช่น at the bank และใช้ to เมื่อเดินทางไป เช่น go to the bank. ในภาษาอังกฤษมักมี the หน้าโรงพยาบาล ร้านค้า และสถานีที่กล่าวถึง.",
+    "rows": [
+      [
+        "school",
+        "โรงเรียน",
+        "สคูล",
+        "The children are at school.",
+        "เด็ก ๆ อยู่ที่โรงเรียน"
+      ],
+      [
+        "hospital",
+        "โรงพยาบาล",
+        "ฮอส-พิ-ทัล",
+        "She works at a hospital.",
+        "เธอทำงานที่โรงพยาบาล"
+      ],
+      [
+        "bank",
+        "ธนาคาร",
+        "แบงค์",
+        "The bank is near the station.",
+        "ธนาคารอยู่ใกล้สถานี"
+      ],
+      [
+        "supermarket",
+        "ซูเปอร์มาร์เก็ต",
+        "ซู-เปอร์-มาร์-คิท",
+        "We buy fruit at the supermarket.",
+        "เราซื้อผลไม้ที่ซูเปอร์มาร์เก็ต"
+      ],
+      [
+        "restaurant",
+        "ร้านอาหาร",
+        "เรส-เทอ-รองท์",
+        "This restaurant is open.",
+        "ร้านอาหารนี้เปิดอยู่"
+      ],
+      [
+        "café",
+        "คาเฟ่",
+        "คา-เฟ",
+        "Let us meet at the café.",
+        "มาเจอกันที่คาเฟ่"
+      ],
+      [
+        "library",
+        "ห้องสมุด",
+        "ไล-บรา-รี",
+        "I read at the library.",
+        "ฉันอ่านหนังสือที่ห้องสมุด"
+      ],
+      [
+        "park",
+        "สวนสาธารณะ",
+        "พาร์ค",
+        "We walk in the park.",
+        "เราเดินเล่นในสวนสาธารณะ"
+      ],
+      [
+        "airport",
+        "สนามบิน",
+        "แอร์-พอร์ท",
+        "I am at the airport.",
+        "ฉันอยู่ที่สนามบิน"
+      ],
+      [
+        "train station",
+        "สถานีรถไฟ",
+        "เทรน สเท-เชิน",
+        "The train station is busy.",
+        "สถานีรถไฟคนพลุกพล่าน"
+      ],
+      [
+        "hotel",
+        "โรงแรม",
+        "โฮ-เทล",
+        "Our hotel is near the beach.",
+        "โรงแรมของเราอยู่ใกล้ชายหาด"
+      ],
+      [
+        "pharmacy",
+        "ร้านขายยา",
+        "ฟาร์-มะ-ซี",
+        "The pharmacy is open.",
+        "ร้านขายยาเปิดอยู่"
+      ]
+    ]
+  },
+  {
+    "id": "body",
+    "title": "ส่วนต่าง ๆ ของร่างกาย",
+    "en": "Body",
+    "icon": "user",
+    "color": "rose",
+    "tip": "ชื่อส่วนของร่างกายมักมี my/your/his/her นำหน้า เช่น my head. foot มีรูปพหูพจน์ feet ส่วน hair เมื่อหมายถึงผมโดยรวมมักใช้คำนามนับไม่ได้.",
+    "rows": [
+      [
+        "head",
+        "ศีรษะ",
+        "เฮด",
+        "My head hurts.",
+        "ฉันปวดหัว"
+      ],
+      [
+        "hair",
+        "ผม",
+        "แฮร์",
+        "Her hair is long.",
+        "ผมของเธอยาว"
+      ],
+      [
+        "face",
+        "ใบหน้า",
+        "เฟซ",
+        "Wash your face.",
+        "ล้างหน้าของคุณ"
+      ],
+      [
+        "eye",
+        "ตา",
+        "อาย",
+        "My eye hurts.",
+        "ฉันปวดตา"
+      ],
+      [
+        "ear",
+        "หู",
+        "เอียร์",
+        "My ear hurts.",
+        "ฉันปวดหู"
+      ],
+      [
+        "nose",
+        "จมูก",
+        "โนซ",
+        "My nose is cold.",
+        "จมูกของฉันเย็น"
+      ],
+      [
+        "mouth",
+        "ปาก",
+        "เมาธ์",
+        "Open your mouth, please.",
+        "กรุณาอ้าปาก"
+      ],
+      [
+        "hand",
+        "มือ",
+        "แฮนด์",
+        "Raise your hand.",
+        "ยกมือของคุณ"
+      ],
+      [
+        "arm",
+        "แขน",
+        "อาร์ม",
+        "My arm is tired.",
+        "แขนของฉันเมื่อย"
+      ],
+      [
+        "leg",
+        "ขา",
+        "เลก",
+        "My leg hurts.",
+        "ฉันปวดขา"
+      ],
+      [
+        "foot",
+        "เท้า",
+        "ฟุท",
+        "My foot is wet.",
+        "เท้าของฉันเปียก"
+      ],
+      [
+        "finger",
+        "นิ้วมือ",
+        "ฟิง-เกอร์",
+        "I cut my finger.",
+        "ฉันบาดนิ้วมือ"
+      ]
+    ]
   }
 ];
 export const vocabularyCategories = categories.map(({rows,...category})=>category);
@@ -966,8 +1586,9 @@ export const basicVocabulary = categories.flatMap(category=>category.rows.map(([
  id:category.id+':'+en.toLowerCase().replaceAll(' ','-'),category:category.id,en,th,sound,example,translation,symbol:symbol||''
 })));
 export function findBasicWords({category='all',query='',unreviewed=false,reviewed=[]}={}){
- const text=query.trim().toLocaleLowerCase(),seen=new Set(reviewed);
- return basicVocabulary.filter(w=>(text||category==='all'||w.category===category)&&(!unreviewed||!seen.has(w.id))&&(!text||[w.en,w.th,w.symbol,w.symbol.replaceAll(',','')].join(' ').toLocaleLowerCase().includes(text)));
+ const fold=value=>value.toLocaleLowerCase().normalize('NFD').replace(/\p{M}/gu,'');
+ const text=fold(query.trim()),seen=new Set(reviewed);
+ return basicVocabulary.filter(w=>(text||category==='all'||w.category===category)&&(!unreviewed||!seen.has(w.id))&&(!text||fold([w.en,w.th,w.symbol,w.symbol.replaceAll(',','')].join(' ')).includes(text)));
 }
 export function shuffle(items,random=Math.random){
  const result=[...items];for(let i=result.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;
